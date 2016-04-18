@@ -440,6 +440,7 @@ class Mail(object):
 				self.compose(tenw.query(time, item[1:]))
 			if item[0] == 'mig':
 				self.compose(tenw.migrate(time, plan, item[1:]))
+				self.send(plan.mailFormat())
 			if item[0] == 'pin':
 				self.compose(tenw.pin(time, item[1:]))
 			if item[0] == 'dln':
