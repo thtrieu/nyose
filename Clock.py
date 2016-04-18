@@ -83,7 +83,8 @@ class Clock(object):
 		time.update()
 		dayendNoPlan = time.timeStamp >= self.dayend and time.tdSig >= plan.newestPlanSig
 		daybeingNoPlan = time.timeStamp < self.dayend and time.tdSig > plan.newestPlanSig
-		planFor = dayendNoPlan * time.tmrSig + daybeingNoPlan * time.tdSig
+		# If both is false, planFor is for today
+		planFor = dayendNoPlan * time.tmrSig + (not dayendNoPlan) * time.tdSig
 		if dayendNoPlan or daybeingNoPlan:
 			print "log down journal {}".format(time.tdSig)
 			jnal.logdown(time) # anything happen next belong to next day.
