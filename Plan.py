@@ -7,7 +7,6 @@ class Plan(object):
 		self.newestPlanSig = self.getNewestPlanSig()
 		self.newestPlanList = self.getPlanList(self.newestPlanSig)
 		self.keys = self.newestPlanList.keys()
-		print self.newestPlanList
 		self.keys.sort()
 		self.noti = set([])
 

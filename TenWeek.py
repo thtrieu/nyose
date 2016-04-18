@@ -248,11 +248,11 @@ class TenWeek(object):
 		if dateSig not in self.tenw:
 			return []
 		else:
-			content = self.tenw[dateSig]['TODO']
+			content = [] + self.tenw[dateSig]['TODO']
 			for dln in self.tenw[dateSig]['DEADLINE']:
 				if not dln[1]:
 					content.append(
-						'(deadline today) {}'.format(dln[0]))
+						'[deadline] {}'.format(dln[0]))
 			return content
 
 	def calendar(self):

@@ -103,5 +103,4 @@ class Clock(object):
 			rt.stop()
 			mail.clean()
 			jnal.logdown(time)
-			tenw.revive(time)
 			mail.sendExit()
