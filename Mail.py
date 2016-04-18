@@ -410,14 +410,16 @@ class Mail(object):
 	def howto(self):
 		return 'mail' in self.compiled
 
-	def tutorial(self):
+	def tutorial(self, order):
 		mail = dict()
 		mail['transfer'] = 'how to give order'
 		mail['instructions'] = '\n' + self.instruction
 		return mail
 
 	def doHowto(self):
-		self.compose(self.tutorial())
+		doings = self.compiled['mail']
+		for item in doings:
+			self.compose(item, self.tutorial, item[1:])
 
 	def doPlan(self, plan):
 		doings = self.compiled['plan']
