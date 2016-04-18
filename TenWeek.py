@@ -189,7 +189,8 @@ class TenWeek(object):
 			order_i = int(order[i])	- 1
 			content = self.todayNotice[order_i]
 			self.todayNotice[order_i] = (content[0],content[1],True)
-			self.tenw[content[0]]['DEADLINE'][content[1]][1] = True
+			temp = self.tenw[content[0]]['DEADLINE'][content[1]][0]
+			self.tenw[content[0]]['DEADLINE'][content[1]] = (temp, True)
 		
 		mail['tenw'] = "submitted '{}' deadlines".format(
 			len(order))
