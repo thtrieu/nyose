@@ -35,6 +35,7 @@ class Clock(object):
 		self.interval = interval
 		self.notiSoon = notiSoon
 		self.dayend = dayend
+		self.sent = False
 		self.exit = False
 
 	def config(self, new_conf):
@@ -87,12 +88,16 @@ class Clock(object):
 			jnal.logdown(time) # anything happen next belong to next day.
 			print "cleaning communications"
 			mail.clean()
+			self.sent = False
 			tenw.revive(time)
+			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
+		
+		if not self.sent:
 			print "sending notice list {}".format(planFor)
 			mail.send(tenw.todayDlMailFormat(time, self.dayend))
-			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
 			print "sending plan {}".format(planFor)
 			mail.send(plan.mailFormat())
+			self.sent = True
 
 	def run(self, time, tenw, wtab, jnal, plan, mail):
 		print "run ..."
