@@ -341,6 +341,9 @@ class Mail(object):
 				self.compiled['conf'][2] = int(order[1])
 			if sig == 'kil':
 				self.compiled['conf'][3] = True
+			if sig == 'how':
+				if len(order) > 1:
+					kind = 'jnal'
 			if kind != 'conf': 
 				if not content: 
 					if kind == 'jnal' and sig not in ['fin', 'rev']:
@@ -417,10 +420,8 @@ class Mail(object):
 		return mail
 
 	def doHowto(self):
-		doings = self.compiled['mail']
-		for item in doings:
-			self.compose(item, self.tutorial, item[1:])
-
+		self.compose('', self.tutorial, [])
+		
 	def doPlan(self, plan):
 		doings = self.compiled['plan']
 		for item in doings:
@@ -483,7 +484,7 @@ class Mail(object):
 			self.composeFailure(item)
 
 	def composeFailure(self, item):
-		key = 'fail to parse'
+		key = 'execute fail'
 		if key in self.composing:
 			self.composing[key].append(str(item))
 		else:
