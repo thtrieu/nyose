@@ -54,7 +54,7 @@ class Clock(object):
 		time.update()
 		comingStamp = plan.thereIsComingEvent(time, self.notiSoon)
 		if not (comingStamp is False) and comingStamp < self.dayend:
-			print 'sending notification at {} of {}'.format(
+			print 'send notification at {} of {}'.format(
 				time.timeStamp, time.tdSig)
 			mail.send(plan.eventMailFormat(comingStamp))
 			plan.noti.add(comingStamp)
@@ -77,6 +77,7 @@ class Clock(object):
 			if mail.tenw():
 				mail.doTenWeek(time, plan, tenw, self.dayend) # Send confirmation inside
 			mail.allProcessed()
+			print "all processed"
 
 		# Priority 03: Day end, next day planning + revive
 		time.update()
@@ -84,23 +85,25 @@ class Clock(object):
 		daybeingNoPlan = time.timeStamp < self.dayend and time.tdSig > plan.newestPlanSig
 		planFor = dayendNoPlan * time.tmrSig + daybeingNoPlan * time.tdSig
 		if dayendNoPlan or daybeingNoPlan:
-			print "log down jounal {}".format(time.tdSig)
+			print "log down journal {}".format(time.tdSig)
 			jnal.logdown(time) # anything happen next belong to next day.
-			print "cleaning communications"
+			print "dump plan {}".format(plan.newestPlanSig)
+			plan.dump()
+			print "clean communications"
 			mail.clean()
 			self.sent = False
 			tenw.revive(time)
 			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
 		
 		if not self.sent:
-			print "sending notice list {}".format(planFor)
+			print "send notice list {}".format(planFor)
 			mail.send(tenw.todayDlMailFormat(time, self.dayend))
-			print "sending plan {}".format(planFor)
+			print "send plan {}".format(planFor)
 			mail.send(plan.mailFormat())
 			self.sent = True
 
 	def run(self, time, tenw, wtab, jnal, plan, mail):
-		print "run ..."
+		print "running plan"
 		rt = RepeatedTimer(self.interval, self.checkAndDo,
 			time, tenw, wtab, jnal, plan, mail)
 		try:
@@ -109,6 +112,11 @@ class Clock(object):
 				sleep(4.9)
 		finally:
 			rt.stop()
-			mail.clean()
+			
+			print "dump plan and journal before exiting"
+			plan.dump()
 			jnal.logdown(time)
+
+			print "clean and say goodbye"
+			mail.clean()
 			mail.sendExit()

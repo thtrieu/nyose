@@ -252,7 +252,7 @@ class TenWeek(object):
 			for dln in self.tenw[dateSig]['DEADLINE']:
 				if not dln[1]:
 					content.append(
-						'[deadline] {}'.format(dln[0]))
+						'<+deadline+> {}'.format(dln[0]))
 			return content
 
 	def calendar(self):

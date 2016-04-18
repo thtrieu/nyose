@@ -10,10 +10,12 @@ class Plan(object):
 		self.keys.sort()
 		self.noti = set([])
 		
-	def dump(self, dateSig):
+	def dump(self):
+		dateSig = self.newestPlanSig
 		with open('plans/' + dateSig, 'w') as f:
 			for key in self.keys:
 				for content in self.newestPlanList[key]:
+					if '<+deadline+>' in content: continue
 					writedown = "{} {}\n".format(
 						key, content)
 					f.write(writedown)
@@ -74,14 +76,13 @@ class Plan(object):
 		else:
 			wday = time.nextwday
 			dSig = time.tmrSig
-		self.dump(self.newestPlanSig)
 		planList = wtab.getPlan(wday)
 		planList['TODO'] = tenw.todos(dSig)
 		self.newestPlanSig = dSig
 		self.newestPlanList = planList
 		self.keys = planList.keys()
 		self.keys.sort()
-		self.dump(self.newestPlanSig)
+		self.dump()
 		self.noti = set([])
 
 	def mailFormat(self, planDate = ''):
