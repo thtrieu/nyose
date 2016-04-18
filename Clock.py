@@ -103,7 +103,7 @@ class Clock(object):
 			self.sent = True
 
 	def run(self, time, tenw, wtab, jnal, plan, mail):
-		print "running plan"
+		print "running loop"
 		rt = RepeatedTimer(self.interval, self.checkAndDo,
 			time, tenw, wtab, jnal, plan, mail)
 		try:
@@ -112,7 +112,7 @@ class Clock(object):
 				sleep(4.9)
 		finally:
 			rt.stop()
-			
+
 			print "dump plan and journal before exiting"
 			plan.dump()
 			jnal.logdown(time)
