@@ -474,7 +474,7 @@ class Mail(object):
 			if item[0] == 'set':
 				self.compose(item, wtab.set, item[1:])
 			if item[0] == 'tab':
-				self.compose(item, wtab.table, item[1:])
+				self.compose(item, wtab.tableQuery, item[1:])
 
 	def compose(self, item, obj, *args, **kwargs):
 		try:

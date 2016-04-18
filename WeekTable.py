@@ -46,7 +46,7 @@ class WeekTable(object):
 			hrow += 1
 		return hrow
 
-	def table(self, order):
+	def tableQuery(self, order):
 		mail = dict()
 		col = self.colRegularise(order[0])
 		if len(order) == 0:
