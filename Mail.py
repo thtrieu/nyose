@@ -326,7 +326,7 @@ class Mail(object):
 					if '/' in order[1]:
 						kind = 'tenw'
 					else:
-						if order[1] == 'ten':
+						if order[1].lower() == 'ten':
 							kind = 'tenw'
 						else:
 							kind = 'wtab'
@@ -385,7 +385,7 @@ class Mail(object):
 			# Now for the rest cases
 			if kind != 'conf': 
 				if not content: 
-					if kind == 'jnal' and sig not in ['fin', 'rev']:
+					if kind == 'jnal' and sig not in ['fin', 'qry']:
 						content = ['log'] + paste(order,0)
 					else:
 						content = order

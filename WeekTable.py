@@ -46,14 +46,18 @@ class WeekTable(object):
 			hrow += 1
 		return hrow
 
+	def wholetable(self):
+		mail = dict()
+		mail['transfer'] = 'your current week table'
+		mail[''] = 'not yet implemented'
+		return mail
+
 	def tableQuery(self, order):
 		mail = dict()
 		col = self.colRegularise(order[0])
-		if len(order) == 0:
-			mail['transfer'] = 'your current week table'
-			mail['wtab'] = 'not yet implemented'
-			return mail
 		if len(order) == 1:
+			if order[0] == 'tab':
+				return self.wholetable()
 			srow = 0
 			erow = len(self.table)-2
 		if len(order) == 2:

@@ -1,35 +1,5 @@
-from threading import Timer
 from time import sleep
 
-# Repeated Timer, for scheduling
-# What's good? : change interval/ exit anytime!
-class RepeatedTimer(object):
-    def __init__(self, interval, function, *args, **kwargs):
-        self._timer     = None
-        self.interval   = interval
-        self.function   = function
-        self.args       = args
-        self.kwargs     = kwargs
-        self.is_running = False
-        self.start()
-
-    def _run(self):
-        self.is_running = False
-        self.start()
-        self.function(*self.args, **self.kwargs)
-
-    def start(self):
-        if not self.is_running:
-            self._timer = Timer(self.interval, self._run)
-            self._timer.start()
-            self.is_running = True
-
-    def stop(self):
-        self._timer.cancel()
-        self.is_running = False
-
-
-# Use Repeated Timer to do jobs
 class Clock(object):
 	def __init__(self, interval = 5.0, notiSoon = 10, dayend = 2340):
 		self.interval = interval
@@ -40,12 +10,16 @@ class Clock(object):
 
 	def config(self, new_conf):
 		if new_conf[0] > 0:
+			print "change interval"
 			self.interval = int(new_conf[0])
 		if new_conf[1] > 0:
+			print "change noti interval"
 			self.notiSoon = int(new_conf[1])
 		if new_conf[2] > 0:
+			print "change dayend point"
 			self.dayend = int(new_conf[2])
 		if new_conf[3]:
+			print "received terminal signal"
 			self.exit = True
 
 	def checkAndDo(self, time, tenw, wtab, jnal, plan, mail):
@@ -109,16 +83,16 @@ class Clock(object):
 
 	def run(self, time, tenw, wtab, jnal, plan, mail):
 		print "running loop"
-		rt = RepeatedTimer(self.interval, self.checkAndDo,
-			time, tenw, wtab, jnal, plan, mail)
 		try:
 			# Infinite loop until master send EXIT email.
 			while not self.exit:
-				sleep(4.9)
+				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
+				sleep(self.interval)
+		except:
+				print '\nsomething wrong, skipped to next loop'
+				sleep(self.interval)
 		finally:
-			rt.stop()
-
-			print "dump plan and journal before exiting"
+			print "\ndump plan and journal before exiting"
 			plan.dump()
 			jnal.logdown(time)
 

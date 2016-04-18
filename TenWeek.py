@@ -108,13 +108,17 @@ class TenWeek(object):
 			mail['plan'] = "todo #{}: '{}' is migrated".format(
 				todo_i + 1, content)
 		if len(order) == 2:
-			time_i = ord(order[0])-97
-			key = plan.keys[time_i]
+			if len(order[0]) == 1:
+				time_i = ord(order[0])-97
+				key = plan.keys[time_i]
+			else:
+				key = int(order[0])
 			content = plan.newestPlanList[key][int(order[1])-1]
 			del plan.newestPlanList[key][int(order[1])-1]
 			if len(plan.newestPlanList[key]) == 0:
 				del plan.newestPlanList[key]
-				del plan.keys[time_i]
+				plan.keys = plan.newestPlanList.keys()
+				plan.keys.sort()
 			mail['plan'] = "timed {}#{}: '{}' is migrated".format(
 				key, order[1], content)
 		if time.tmrSig in self.tenw:
@@ -223,31 +227,41 @@ class TenWeek(object):
 		if date not in self.tenw:
 			mail['tenw'] = '{} is empty, nothing to be deleted'.format(
 				date)
+			self.dump()
 			return mail
 		if len(order) == 1:
-			self.tenw[date] = {'TODO':[], 'DEADLINE':[]}
+			del self.tenw[date]
 			mail['tenw'] = 'deleted whole {}'.format(date)
+			self.dump()
 			return date
-		if order[1].lower() = 'td':
+		if order[1].lower() == 'td':
 			kind = 'TODO'
 		else:
-			kind = 'DEADLINE':
+			kind = 'DEADLINE'
 		if len(order) == 2:
 			self.tenw[date][kind] = []
 			mail['tenw'] = "{} of {} is emptied".format(
 				kind, date)
+			if self.tenw[date] == {'TODO':[], 'DEADLINE':[]}:
+				del self.tenw[date]
+				mail['tenw'] += ", turn out {} is now empty, deleted it.".format(date)
+			self.dump()
 			return mail
 		num = int(order[2]) - 1
 		del self.tenw[date][kind][num]
 		mail['tenw'] = "{}#{} of {} is removed".format(
 			kind, num+1, date)
+		if self.tenw[date] == {'TODO':[], 'DEADLINE':[]}:
+			del self.tenw[date]
+			mail['tenw'] += ", turn out {} is now empty, deleted it.".format(date)
+		self.dump()
 		return mail
 
 	def query(self, time, order):
 		mail = dict()
 		if len(order) == 1:
-			if order[0].lower == 'ten':
-				self.calendar()
+			if order[0].lower() == 'ten':
+				return self.calendar()
 			else:
 				from_str = to_str = self.dateRegul(order[0],time)
 		if len(order) == 2:

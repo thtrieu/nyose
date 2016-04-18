@@ -161,9 +161,13 @@ class Plan(object):
 		return mail
 
 	def move(self, order):
+		print order
 		mail = dict()
 		try:
 			todo_i = int(order[0])-1
+			if todo_i > 100: #commit suicide
+				temp = int('a')
+			print 'go try'
 			content = self.newestPlanList['TODO'][todo_i]
 			del self.newestPlanList['TODO'][todo_i]
 
@@ -181,6 +185,7 @@ class Plan(object):
 			mail['plan'] = "Moved todo #{}: '{}' to timed {}".format(
 				todo_i, content, key)
 		except:
+			print 'go except'
 			if len(order[0]) == 1:
 				time_i = ord(order[0])-97
 				key = self.keys[time_i]
