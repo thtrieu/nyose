@@ -77,7 +77,6 @@ class Plan(object):
 			wday = time.nextwday
 			dSig = time.tmrSig
 		planList = wtab.getPlan(wday)
-		planList['TODO'] = tenw.todos(dSig)
 		self.newestPlanSig = dSig
 		self.newestPlanList = planList
 		self.keys = planList.keys()

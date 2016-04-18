@@ -91,11 +91,13 @@ class Clock(object):
 			plan.dump()
 			print "clean communications"
 			mail.clean()
-			self.sent = False
 			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
+			self.sent = False
 		
+		# Priority 04: System just start
 		if not self.sent:
-			tenw.revive(time)
+			plan.newestPlanList['TODO'] += tenw.todos(planFor) # because sketch, dump, load avoid deadlines
+			tenw.revive(time) # because tenw.todayNotice is not for dump and load at __init__
 			print "send notice list {}".format(planFor)
 			mail.send(tenw.todayDlMailFormat(time, self.dayend))
 			print "send plan {}".format(planFor)
