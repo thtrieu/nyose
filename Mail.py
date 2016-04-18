@@ -12,6 +12,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import mimetypes
 import os
+import sys
 import time
 
 class Communicator(object):
@@ -171,9 +172,9 @@ class Mail(object):
 		self.newestMailSig = str()
 		self.compiled = self.compileDefault()
 		self.sigs = {'plan': ['del','add','cha','mov'],
-				'jnal': ['fin','log','rev'],
-				'wtab': ['set','tab'],
-				'tenw': ['qry','mig','pin','dln','sbm','ten'],
+				'jnal': ['fin','log','qry'],
+				'wtab': ['set','qry'],
+				'tenw': ['qry','mig','pin','dln','sbm','del'],
 				'conf': ['int','nti','dye','kil'],
 				'mail': ['how']}
 		self.composing = dict()
@@ -188,6 +189,9 @@ class Mail(object):
 			# To delete a plan item
 			del <?char>:todo <num>
 
+			# To delete a calenda item
+			del <date> <td/dl> <num>
+
 			# To add a plan item:
 			add <char/stamp/todo> <content> 
 
@@ -197,6 +201,9 @@ class Mail(object):
 			# To move a todo item to a timed item
 			mov <num> <char/stamp>
 
+			# To move a timed item to a todo item
+			mov <char/stamp> <num>
+
 			# To mark that a todo item is done
 			fin <?char>:todo <num>
 
@@ -204,13 +211,13 @@ class Mail(object):
 			log <content>
 
 			# To review the journal of a few recent days
-			rev <?num>:1
+			qry <?num>:1
 
 			# To set new content inside the week table
 			set <wday> <?start>:0600 <?end>:start <content>
 
 			# To query contents from the table
-			tab <wday> <?start>:0600 <?end>:start
+			qry <wday> <?start>:0600 <?end>:start
 
 			# To check todo and deadlines during a period of time
 			qry <start-date> <?end-date>:start-date
@@ -228,7 +235,7 @@ class Mail(object):
 			sbm <num> <num> <num>...
 
 			# To query the 10-week calendar
-			ten 
+			ten
 
 			# To set a new interval
 			int <num>
@@ -248,7 +255,10 @@ class Mail(object):
 		default['conf'] = [0, 0, 0, False]
 		return default
 
-	# API Related functions
+	#=======================+
+	# API Related functions |
+	#=======================+
+
 	def clean(self):
 		
 		def clean_ft(from_name, to_service):
@@ -283,6 +293,7 @@ class Mail(object):
 		self.parse()
 
 	def parse(self):
+
 		def add(key, content):
 			if key in self.compiled:
 				self.compiled[key].append(content)
@@ -296,13 +307,40 @@ class Mail(object):
 			order = line.split()
 			order[0] = order[0].lower()
 			sig = order[0]
+
 			kind = 'jnal'
+			# For definite kind
 			for key in self.sigs:
 				if sig in self.sigs[key]:
 					kind = key
 					break
 
+			# To solve ambiguity in kind
+			if sig == 'qry':
+				if len(order) == 1:
+					continue
+				try:
+					temp = int(order[1])
+					kind = 'jnal'
+				except:
+					if '/' in order[1]:
+						kind = 'tenw'
+					else:
+						if order[1] == 'ten':
+							kind = 'tenw'
+						else:
+							kind = 'wtab'
+			if sig == 'del':
+				if '/' in order[1]:
+					kind = 'tenw'
+				else:
+					kind = 'plan'
+			if sig == 'how':
+				if len(order) > 1:
+					kind = 'jnal'
+
 			content = False
+			# To solve ambiguity in content
 			if sig == 'add':
 				content = paste(order, 2)
 			if sig == 'cha':
@@ -333,6 +371,8 @@ class Mail(object):
 					content = paste(order, 1)
 			if sig == 'dln':
 				content = paste(order, 2)
+
+			# jump straigt to config
 			if sig == 'int':
 				self.compiled['conf'][0] = int(order[1])
 			if sig == 'nti':
@@ -341,9 +381,8 @@ class Mail(object):
 				self.compiled['conf'][2] = int(order[1])
 			if sig == 'kil':
 				self.compiled['conf'][3] = True
-			if sig == 'how':
-				if len(order) > 1:
-					kind = 'jnal'
+			
+			# Now for the rest cases
 			if kind != 'conf': 
 				if not content: 
 					if kind == 'jnal' and sig not in ['fin', 'rev']:
@@ -390,14 +429,16 @@ class Mail(object):
 		mail[''] = ["bluetime terminated. We've been through great time"]
 		self.send(mail)
 
-	# Processing newly come mails
+	#======================+
+	# After parse checking |
+	#======================+
+
 	def received(self):
 		return self.newestMailSig != self.newestProcess
 
 	def conf(self):
 		return self.compiled['conf'] 
 
-	# Checking methods
 	def plan(self):
 		return 'plan' in self.compiled
 
@@ -412,6 +453,10 @@ class Mail(object):
 
 	def howto(self):
 		return 'mail' in self.compiled
+
+	#================+
+	# Execute orders |
+	#================+
 
 	def tutorial(self, order):
 		mail = dict()
@@ -452,8 +497,8 @@ class Mail(object):
 			if item[0] == 'sbm':
 				self.compose(item, tenw.submitted, item[1:])
 				flag = True
-			if item[0] == 'ten':
-				self.compose(item, tenw.calendar)
+			if item[0] == 'del':
+				self.compose(item, tenw.delete, time, item[1:])
 		if flag:
 			self.send(tenw.todayDlMailFormat(time, dayend))
 
@@ -465,7 +510,7 @@ class Mail(object):
 				self.send(plan.mailFormat())
 			if item[0] == 'log':
 				self.compose(item, jnal.log, item[1:], time)
-			if item[0] == 'rev':
+			if item[0] == 'qry':
 				self.compose(item, jnal.review, item[1:], time)
 
 	def doWeekTable(self, wtab):
@@ -473,24 +518,29 @@ class Mail(object):
 		for item in doings:
 			if item[0] == 'set':
 				self.compose(item, wtab.set, item[1:])
-			if item[0] == 'tab':
+			if item[0] == 'qry':
 				self.compose(item, wtab.tableQuery, item[1:])
+
+
+	#====================+
+	# Replying to orders |
+	#====================+
 
 	def compose(self, item, obj, *args, **kwargs):
 		try:
 			mailPart = obj(*args, **kwargs)
 			self.composeSuccess(mailPart)
 		except:
-			self.composeFailure(item)
+			err = str(sys.exc_info()[0])
+			self.composeFailure("{} : {}".format(str(item), err))
 
-	def composeFailure(self, item):
+	def composeFailure(self, mess):
 		key = 'execute fail'
 		if key in self.composing:
-			self.composing[key].append(str(item))
+			self.composing[key].append(mess)
 		else:
-			self.composing[key] = [str(item)]
+			self.composing[key] = [mess]
 
-	# Replying to orders
 	def composeSuccess(self, mailPart):
 		# If the mailPart is too large, it is for a separate mail
 		if 'transfer' in mailPart:

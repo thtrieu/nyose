@@ -153,29 +153,49 @@ class Plan(object):
 			key = self.keys[time_i]
 			deleted = self.newestPlanList[key][int(order[1])-1]
 			del self.newestPlanList[key][int(order[1])-1]
+			if len(self.newestPlanList[key]) == 0:
+				del self.newestPlanList[key]
+				del self.keys[time_i]
 			mail['plan'] = "deleted timed {}#{}: '{}'".format(
 				key, order[1], deleted)
 		return mail
 
 	def move(self, order):
 		mail = dict()
-		todo_i = int(order[0])-1
-		content = self.newestPlanList['TODO'][todo_i]
-		del self.newestPlanList['TODO'][todo_i]
+		try:
+			todo_i = int(order[0])-1
+			content = self.newestPlanList['TODO'][todo_i]
+			del self.newestPlanList['TODO'][todo_i]
 
-		if len(order[1]) == 1:
-			time_i = ord(order[0])-97
-			key = self.keys[time_i]	
-		else:
-			key = int(order[1])
+			if len(order[1]) == 1:
+				time_i = ord(order[1])-97
+				key = self.keys[time_i]	
+			else:
+				key = int(order[1])
 			if key in self.newestPlanList:
 				self.newestPlanList[key].append(content)
 			else:
 				self.newestPlanList[key] = [content]
 				self.keys.append(key)
 				self.keys.sort()
-		mail['plan'] = "Moved todo #{}: '{}' to timed {}".format(
-			todo_i, content, key)
+			mail['plan'] = "Moved todo #{}: '{}' to timed {}".format(
+				todo_i, content, key)
+		except:
+			if len(order[0]) == 1:
+				time_i = ord(order[0])-97
+				key = self.keys[time_i]
+			else:
+				key = int(order[0])
+			num = int(order[1])-1
+			content = self.newestPlanList[key][num]
+			self.newestPlanList['TODO'].append(content)
+			del self.newestPlanList[key][num]
+			if len(self.newestPlanList[key]) == 0:
+				del self.newestPlanList[key]
+				self.keys = self.newestPlanList.keys()
+				self.keys.sort()
+			mail['plan'] = "Moved timed {}#{}: '{}' to TODO".format(
+				key, num+1, content)
 		return mail
 
 	def finish(self, order):
