@@ -79,17 +79,20 @@ class Clock(object):
 
 		# Priority 03: Day end, next day planning + revive
 		time.update()
-		if time.tdSig >= plan.newestPlanSig and time.timeStamp >= self.dayend:
-			print "cleaning communications"
-			mail.clean()
+		dayendNoPlan = time.timeStamp >= self.dayend and time.tdSig >= plan.newestPlanSig
+		daybeingNoPlan = time.timeStamp < self.dayend and time.tdSig > plan.newestPlanSig
+		planFor = dayendNoPlan * time.tmrSig + daybeingNoPlan * time.tdSig
+		if dayendNoPlan or daybeingNoPlan:
 			print "log down jounal {}".format(time.tdSig)
 			jnal.logdown(time) # anything happen next belong to next day.
+			print "cleaning communications"
+			mail.clean()
 			tenw.revive(time)
-			print "sending notice list {}".format(time.tmrSig)
+			print "sending notice list {}".format(planFor)
 			mail.send(tenw.todayDlMailFormat(time, self.dayend))
-			plan.sketch(time, wtab, tenw) # this set the newestPlan to a new one.
-			print "sending plan {}".format(time.tmrSig)
-			mail.send(plan.mailFormat())			
+			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
+			print "sending plan {}".format(planFor)
+			mail.send(plan.mailFormat())
 
 	def run(self, time, tenw, wtab, jnal, plan, mail):
 		print "run ..."

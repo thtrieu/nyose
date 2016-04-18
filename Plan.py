@@ -12,7 +12,7 @@ class Plan(object):
 		
 	def dump(self, dateSig):
 		with open('plans/' + dateSig, 'w') as f:
-			for key in self.newestPlanList:
+			for key in self.keys:
 				for content in self.newestPlanList[key]:
 					writedown = "{} {}\n".format(
 						key, content)
@@ -67,18 +67,17 @@ class Plan(object):
 		mail['todos'] = self.newestPlanList['TODO']
 		return mail
 
-	def sketch(self, time, wtab, tenw):
+	def sketch(self, time, wtab, tenw, dayend):
+		if time.timeStamp < dayend:
+			wday = time.wday
+			dSig = time.tdSig
+		else:
+			wday = time.nextwday
+			dSig = time.tmrSig
 		self.dump(self.newestPlanSig)
-		planList = wtab.getPlan(time.nextwday)
-		planList['TODO'] = tenw.todos(time.tmrSig)
-		with open('plans/' + time.tmrSig,'w') as f:
-			for key in planList.keys():
-				for item in planList[key]:
-					f.write(' '.join([str(key), item]))
-					f.write('\n')
-
-		#-RESET all
-		self.newestPlanSig = time.tmrSig
+		planList = wtab.getPlan(wday)
+		planList['TODO'] = tenw.todos(dSig)
+		self.newestPlanSig = dSig
 		self.newestPlanList = planList
 		self.keys = planList.keys()
 		self.keys.sort()
