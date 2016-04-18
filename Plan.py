@@ -9,7 +9,7 @@ class Plan(object):
 		self.keys = self.newestPlanList.keys()
 		self.keys.sort()
 		self.noti = set([])
-
+		
 	def dump(self, dateSig):
 		with open('plans/' + dateSig, 'w') as f:
 			for key in self.newestPlanList:
@@ -53,7 +53,7 @@ class Plan(object):
 		for stamp in stamps:
 			if stamp == 'TODO': continue
 			coming = stamp > timeStamp
-			if not coming: return False
+			if not coming: continue
 			within = time.minus(stamp, timeStamp) <= notiSoon
 			notyet = not (stamp in self.noti)
 			if within and notyet:

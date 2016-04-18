@@ -294,6 +294,7 @@ class Mail(object):
 
 		for line in self.compiled['compile']:
 			order = line.split()
+			order[0] = order[0].lower()
 			sig = order[0]
 			kind = 'jnal'
 			for key in self.sigs:
@@ -457,6 +458,7 @@ class Mail(object):
 		for item in doings:
 			if item[0] == 'fin':
 				self.compose(jnal.finish(item[1:], plan, time))
+				self.send(plan.mailFormat())
 			if item[0] == 'log':
 				self.compose(jnal.log(item[1:], time))
 			if item[0] == 'rev':
