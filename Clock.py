@@ -92,10 +92,10 @@ class Clock(object):
 			print "clean communications"
 			mail.clean()
 			self.sent = False
-			tenw.revive(time)
 			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
 		
 		if not self.sent:
+			tenw.revive(time)
 			print "send notice list {}".format(planFor)
 			mail.send(tenw.todayDlMailFormat(time, self.dayend))
 			print "send plan {}".format(planFor)
