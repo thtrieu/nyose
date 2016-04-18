@@ -423,13 +423,13 @@ class Mail(object):
 		doings = self.compiled['plan']
 		for item in doings:
 			if item[0] == 'del':
-				self.compose(plan.delete(item[1:]))
+				self.compose(item, plan.delete, item[1:])
 			if item[0] == 'add':
-				self.compose(plan.add(item[1:]))
+				self.compose(item, plan.add, item[1:])
 			if item[0] == 'cha':
-				self.compose(plan.change(item[1:]))
+				self.compose(item, plan.change, item[1:])
 			if item[0] == 'mov':
-				self.compose(plan.move(item[1:]))
+				self.compose(item, plan.move, item[1:])
 		self.send(plan.mailFormat())
 
 	def doTenWeek(self, time, plan, tenw, dayend):
@@ -437,20 +437,20 @@ class Mail(object):
 		doings = self.compiled['tenw']
 		for item in doings:
 			if item[0] == 'qry':
-				self.compose(tenw.query(time, item[1:]))
+				self.compose(item, tenw.query, time, item[1:])
 			if item[0] == 'mig':
-				self.compose(tenw.migrate(time, plan, item[1:]))
+				self.compose(item, tenw.migrate, time, plan, item[1:])
 				self.send(plan.mailFormat())
 			if item[0] == 'pin':
-				self.compose(tenw.pin(time, item[1:]))
+				self.compose(item, tenw.pin, time, item[1:])
 			if item[0] == 'dln':
-				self.compose(tenw.deadline(time, item[1:]))
+				self.compose(item, tenw.deadline, time, item[1:])
 				flag = True
 			if item[0] == 'sbm':
-				self.compose(tenw.submitted(item[1:]))
+				self.compose(item, tenw.submitted, item[1:])
 				flag = True
 			if item[0] == 'ten':
-				self.compose(tenw.calendar())
+				self.compose(item, tenw.calendar)
 		if flag:
 			self.send(tenw.todayDlMailFormat(time, dayend))
 
@@ -458,23 +458,37 @@ class Mail(object):
 		doings = self.compiled['jnal']
 		for item in doings:
 			if item[0] == 'fin':
-				self.compose(jnal.finish(item[1:], plan, time))
+				self.compose(item, jnal.finish, item[1:], plan, time)
 				self.send(plan.mailFormat())
 			if item[0] == 'log':
-				self.compose(jnal.log(item[1:], time))
+				self.compose(item, jnal.log, item[1:], time)
 			if item[0] == 'rev':
-				self.compose(jnal.review(item[1:], time))
+				self.compose(item, jnal.review, item[1:], time)
 
 	def doWeekTable(self, wtab):
 		doings = self.compiled['wtab']
 		for item in doings:
 			if item[0] == 'set':
-				self.compose(wtab.set(item[1:]))
+				self.compose(item, wtab.set, item[1:])
 			if item[0] == 'tab':
-				self.compose(wtab.table(item[1:]))
+				self.compose(item, wtab.table, item[1:])
+
+	def compose(self, item, obj, *args, **kwargs):
+		try:
+			mailPart = obj(*args, **kwargs)
+			self.composeSuccess(mailPart)
+		except:
+			self.composeFailure(item)
+
+	def composeFailure(self, item):
+		key = 'fail to parse'
+		if key in self.composing:
+			self.composing[key].append(str(item))
+		else:
+			self.composing[key] = [str(item)]
 
 	# Replying to orders
-	def compose(self, mailPart):
+	def composeSuccess(self, mailPart):
 		# If the mailPart is too large, it is for a separate mail
 		if 'transfer' in mailPart:
 			title = mailPart['transfer']
@@ -493,7 +507,7 @@ class Mail(object):
 		thread_and_subj = self.thread_and_subj
 		self.composing = dict()
 		self.thread_and_subj = (str(),str())
-		self.compose(part)
+		self.composeSuccess(part)
 		self.composing['title'] = title
 		self.send(self.composing)
 		self.thread_and_subj = thread_and_subj

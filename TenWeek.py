@@ -83,12 +83,12 @@ class TenWeek(object):
 					self.tenw[dln] = {'TODO':[], 'DEADLINE': [(content, False)]}
 		
 
-	def revive(self, time):
+	def revive(self, timeSig):
 		self.moodle()
 		marks = self.tenw.keys()
 		marks.sort()
 		i = 0
-		while marks[i] < time.tdSig: i += 1
+		while marks[i] < timeSig: i += 1
 		marks = marks[i:]
 		self.todayNotice = list()
 		for mark in marks:

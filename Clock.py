@@ -40,11 +40,11 @@ class Clock(object):
 
 	def config(self, new_conf):
 		if new_conf[0] > 0:
-			self.interval = new_conf[0]
+			self.interval = int(new_conf[0])
 		if new_conf[1] > 0:
-			self.notiSoon = new_conf[1]
+			self.notiSoon = int(new_conf[1])
 		if new_conf[2] > 0:
-			self.dayend = new_conf[2]
+			self.dayend = int(new_conf[2])
 		if new_conf[3]:
 			self.exit = True
 
@@ -65,6 +65,7 @@ class Clock(object):
 			print 'received order at {} of {}'.format(
 				time.timeStamp, time.tdSig)
 			time.update()
+
 			self.config(mail.conf())
 			if mail.howto():
 				mail.doHowto()
@@ -97,10 +98,11 @@ class Clock(object):
 		
 		# Priority 04: System just start
 		if not self.sent:
-			plan.newestPlanList['TODO'] += tenw.todos(planFor) # because sketch, dump, load avoid deadlines
-			tenw.revive(time) # because tenw.todayNotice is not for dump and load at __init__
+
 			print "send notice list {}".format(planFor)
+			tenw.revive(planFor) # because tenw.todayNotice is not for dump and load at __init__
 			mail.send(tenw.todayDlMailFormat(time, self.dayend))
+			
 			print "send plan {}".format(planFor)
 			mail.send(plan.mailFormat())
 			self.sent = True

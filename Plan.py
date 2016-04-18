@@ -15,7 +15,6 @@ class Plan(object):
 		with open('plans/' + dateSig, 'w') as f:
 			for key in self.keys:
 				for content in self.newestPlanList[key]:
-					if '<+deadline+>' in content: continue
 					writedown = "{} {}\n".format(
 						key, content)
 					f.write(writedown)
@@ -77,6 +76,7 @@ class Plan(object):
 			wday = time.nextwday
 			dSig = time.tmrSig
 		planList = wtab.getPlan(wday)
+		planList['TODO'] = tenw.todos(dSig)
 		self.newestPlanSig = dSig
 		self.newestPlanList = planList
 		self.keys = planList.keys()
@@ -94,23 +94,6 @@ class Plan(object):
 			planList = self.getPlanList(planDate)
 		mail = planList
 		mail['title'] = 'plan {}'.format(planDate)
-		return mail
-
-	def delete(self, order): # return a mailPart
-		mail = dict()
-		if len(order) == 1:
-			todo_i = int(order[0])-1
-			deleted = self.newestPlanList['TODO'][todo_i]
-			del self.newestPlanList['TODO'][todo_i]
-			mail['plan'] = "deleted todo #{}: '{}'".format(
-				todo_i+1, deleted)
-		else:
-			time_i = ord(order[0])-97
-			key = self.keys[time_i]
-			deleted = self.newestPlanList[key][int(order[1])-1]
-			del self.newestPlanList[key][int(order[1])-1]
-			mail['plan'] = "deleted timed {}#{}: '{}'".format(
-				key, order[1], deleted)
 		return mail
 
 	def add(self, order):
@@ -148,12 +131,30 @@ class Plan(object):
 				time_i = ord(order[0])-97
 				key = self.keys[time_i]
 			except:
-				key = int(order[0])			
+				key = int(order[0])		
 			change = self.newestPlanList[key][int(order[1])-1]
 			to = order[2]
 			self.newestPlanList[key][int(order[1])-1] = to
 			mail['plan'] = "changed timed {}#{}: from '{}' to '{}'".format(
 				key, order[1], change, to)
+		return mail
+
+
+	def delete(self, order): # return a mailPart
+		mail = dict()
+		if len(order) == 1:
+			todo_i = int(order[0])-1
+			deleted = self.newestPlanList['TODO'][todo_i]
+			del self.newestPlanList['TODO'][todo_i]
+			mail['plan'] = "deleted todo #{}: '{}'".format(
+				todo_i+1, deleted)
+		else:
+			time_i = ord(order[0])-97
+			key = self.keys[time_i]
+			deleted = self.newestPlanList[key][int(order[1])-1]
+			del self.newestPlanList[key][int(order[1])-1]
+			mail['plan'] = "deleted timed {}#{}: '{}'".format(
+				key, order[1], deleted)
 		return mail
 
 	def move(self, order):
