@@ -35,24 +35,27 @@ class Plan(object):
 			pl = f.readlines()
 		planList = dict()
 		planList['TODO'] = list()
+		planList['DEADLINE'] = list()
 		for point in pl:
 			p = point.strip()
 			p = p.split()
 			content = ' '.join(p[1:])
-			if p[0] != 'TODO':
-				if int(p[0]) in planList:
-					planList[int(p[0])].append(content)
+			try:
+				key = int(p[0])
+				if key in planList:
+					planList[key].append(content)
 				else:
-					planList[int(p[0])] = [content]
-			else:
-				planList['TODO'].append(content)
+					planList[key] = [content]
+			except:
+				key = p[0]
+				planList[key].append(content)
 		return planList
 
 	def thereIsComingEvent(self, time, notiSoon):
 		stamps = self.keys
 		timeStamp = time.timeStamp
 		for stamp in stamps:
-			if stamp == 'TODO': continue
+			if stamp in ['TODO','DEADLINE']: continue
 			coming = stamp > timeStamp
 			if not coming: continue
 			within = time.minus(stamp, timeStamp) <= notiSoon
@@ -66,6 +69,7 @@ class Plan(object):
 		mail['title'] = 'event'
 		mail[stamp] = self.newestPlanList[stamp]
 		mail['todos'] = self.newestPlanList['TODO']
+		mail['deadlines'] = self.newestPlanList['DEADLINE']
 		return mail
 
 	def sketch(self, time, wtab, tenw, dayend):
@@ -77,6 +81,7 @@ class Plan(object):
 			dSig = time.tmrSig
 		planList = wtab.getPlan(wday)
 		planList['TODO'] = tenw.todos(dSig)
+		planList['DEADLINE'] = tenw.dlns(dSig)
 		self.newestPlanSig = dSig
 		self.newestPlanList = planList
 		self.keys = planList.keys()

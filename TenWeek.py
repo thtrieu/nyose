@@ -130,12 +130,12 @@ class TenWeek(object):
 		self.dump()
 		return mail
 
-	def dateRegul(self, date, time):
+	def dateRegul(self, date, tdSig):
 		dates = date.split('/')
 		day = dates[0]
 		month = dates[1]
 		if len(dates) == 2:
-			year = time.tmrSig.split('-')[0]
+			year = tdSig.split('-')[0]
 		else:
 			year = dates[2]
 		if len(day) == 1:
@@ -151,7 +151,7 @@ class TenWeek(object):
 			date = time.tmrSig
 			content = order[0]
 		if len(order) == 2:
-			date = self.dateRegul(order[0], time)
+			date = self.dateRegul(order[0], time.tdSig)
 			content = order[1]
 
 		if date in self.tenw:
@@ -163,9 +163,11 @@ class TenWeek(object):
 		self.dump()
 		return mail
 
-	def deadline(self, time, order):
+	def deadline(self, tdSig, order):
 		mail = dict()
-		date = self.dateRegul(order[0], time)
+		date = self.dateRegul(order[0], tdSig)
+		if date == tdSig:
+			mail['plan_changed'] = True
 		content = order[1]
 		index = int()
 		if date in self.tenw:
@@ -189,11 +191,13 @@ class TenWeek(object):
 		self.dump()
 		return mail
 
-	def submitted(self, order):
+	def submitted(self, tdSig, order):
 		mail = dict()
 		for i in range(0, len(order)):
 			order_i = int(order[i])	- 1
 			content = self.todayNotice[order_i]
+			if content[0] == tdSig:
+				mail['plan_changed'] = True
 			self.todayNotice[order_i] = (content[0],content[1],True)
 			temp = self.tenw[content[0]]['DEADLINE'][content[1]][0]
 			self.tenw[content[0]]['DEADLINE'][content[1]] = (temp, True)
@@ -221,15 +225,17 @@ class TenWeek(object):
 		mail['notice'] = noticeList
 		return mail
 
-	def delete(self, time, order):
+	def delete(self, tdSig, order):
 		mail = dict()
-		date = self.dateRegul(order[0], time)
+		date = self.dateRegul(order[0], tdSig)
 		if date not in self.tenw:
 			mail['tenw'] = '{} is empty, nothing to be deleted'.format(
 				date)
 			self.dump()
 			return mail
 		if len(order) == 1:
+			if date == tdSig and self.tenw[date]['DEADLINE'] != []:
+				mail['plan_changed'] = True
 			del self.tenw[date]
 			mail['tenw'] = 'deleted whole {}'.format(date)
 			self.dump()
@@ -239,6 +245,8 @@ class TenWeek(object):
 		else:
 			kind = 'DEADLINE'
 		if len(order) == 2:
+			if date == tdSig and self.tenw[date]['DEADLINE'] != []:
+				mail['plan_changed'] = True
 			self.tenw[date][kind] = []
 			mail['tenw'] = "{} of {} is emptied".format(
 				kind, date)
@@ -248,6 +256,12 @@ class TenWeek(object):
 			self.dump()
 			return mail
 		num = int(order[2]) - 1
+		if not num < len(self.tenw[date][kind]):
+			mail['tenw'] = "{} of {} does not have at least {} elements".format(
+				kind, date, num + 1)
+			return mail
+		if date == tdSig and kind == 'DEADLINE':
+			mail['plan_changed'] = True
 		del self.tenw[date][kind][num]
 		mail['tenw'] = "{}#{} of {} is removed".format(
 			kind, num+1, date)
@@ -295,10 +309,20 @@ class TenWeek(object):
 			return []
 		else:
 			content = [] + self.tenw[dateSig]['TODO']
+			return content
+
+	def dlns(self, dateSig):
+		if dateSig not in self.tenw:
+			return []
+		else:
+			content = []
 			for dln in self.tenw[dateSig]['DEADLINE']:
 				if not dln[1]:
 					content.append(
-						'<+deadline+> {}'.format(dln[0]))
+						'{} [NOT YET SUBMITTED]'.format(dln[0]))
+				else:
+					content.append(
+						'{} [SUBMITTED]'.format(dln[0]))
 			return content
 
 	def calendar(self):

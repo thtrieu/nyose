@@ -94,7 +94,14 @@ class Clock(object):
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
 				sleep(self.interval)
 			except:
-				print '\n error: {}'.format(str(sys.exc_info()[0]))
+				err = str(sys.exc_info()[0])
+				print '\nERROR: {}. Log down'.format(err)
+				time.update()
+				with open('ERRORLOG','a') as f:
+					f.write('{}: {}\n'.format(time.timeStamp, err))
+				print "save plan and journal"
+				plan.dump()
+				jnal.logdown(time)
 				print 'reinitialise mail'
 				self.mailReInit = True
 				break
@@ -102,5 +109,4 @@ class Clock(object):
 			print "clean and say goodbye"
 			mail.clean()
 			mail.sendExit()
-		else:
-			print 'mail: Off'
+		print 'mail: Off'

@@ -167,10 +167,12 @@ class Communicator(object):
 
 class Mail(object):
 	def __init__(self, reinit):
-		self.newestProcess = str()
 		self.newestMailSig = str()
+		self.file = 'newestProcess'
+		with open(self.file, 'r') as f:
+			self.newestProcess = f.read()
 		self.compiled = self.compileDefault()
-		self.sigs = {'plan': ['del','add','cha','mov'],
+		self.sigs = {'plan': ['del','add','fix','mov'],
 				'jnal': ['fin','log','qry'],
 				'wtab': ['set','qry'],
 				'tenw': ['qry','mig','pin','dln','sbm','del'],
@@ -345,7 +347,7 @@ class Mail(object):
 			# To solve ambiguity in content
 			if sig == 'add':
 				content = paste(order, 2)
-			if sig == 'cha':
+			if sig == 'fix':
 				try:
 					num = int(order[1])
 					if num < 100:
@@ -476,7 +478,7 @@ class Mail(object):
 				self.compose(item, plan.delete, item[1:])
 			if item[0] == 'add':
 				self.compose(item, plan.add, item[1:])
-			if item[0] == 'cha':
+			if item[0] == 'fix':
 				self.compose(item, plan.change, item[1:])
 			if item[0] == 'mov':
 				self.compose(item, plan.move, item[1:])
@@ -494,15 +496,17 @@ class Mail(object):
 			if item[0] == 'pin':
 				self.compose(item, tenw.pin, time, item[1:])
 			if item[0] == 'dln':
-				self.compose(item, tenw.deadline, time, item[1:])
+				plan_changed = self.compose(item, tenw.deadline, time.tdSig, item[1:])
 				flag = True
 			if item[0] == 'sbm':
-				self.compose(item, tenw.submitted, item[1:])
+				plan_changed = self.compose(item, tenw.submitted, time.tdSig, item[1:])
 				flag = True
 			if item[0] == 'del':
-				self.compose(item, tenw.delete, time, item[1:])
+				plan_changed = self.compose(item, tenw.delete, time.tdSig, item[1:])
 		if flag:
 			self.send(tenw.todayDlMailFormat(time, dayend))
+		if plan_changed is True:
+			self.send(plan.mailFormat())
 
 	def doJournal(self, plan, jnal, time):
 		doings = self.compiled['jnal']
@@ -531,7 +535,12 @@ class Mail(object):
 	def compose(self, item, obj, *args, **kwargs):
 		try:
 			mailPart = obj(*args, **kwargs)
+			flag = False
+			if 'plan_changed' in mailPart:
+				flag = True
+				del mailPart['plan_changed']
 			self.composeSuccess(mailPart)
+			return flag
 		except:
 			err = str(sys.exc_info()[0])
 			self.composeFailure("{} : {}".format(str(item), err))
@@ -573,6 +582,8 @@ class Mail(object):
 		if len(self.composing.keys()) != 1:
 			self.send(self.composing)
 		self.newestProcess = self.newestMailSig
+		with open(self.file, 'w') as f:
+			f.write(self.newestProcess)
 		self.composing = dict()
 		self.thread_and_subj = (str(), str())
 		self.compiled = self.compileDefault()
