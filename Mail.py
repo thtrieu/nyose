@@ -22,7 +22,6 @@ class Communicator(object):
 		self.master_name = 'thtrieu@apcs.vn'
 		self.server = self.getService(self.server_name)
 		self.master = self.getService(self.master_name)
-		self.wkdays = set(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'])
 	#Used
 	def getService(self, name):
 		CLIENT_SECRET = 'clientSecrets.json'
@@ -167,7 +166,7 @@ class Communicator(object):
 
 
 class Mail(object):
-	def __init__(self):
+	def __init__(self, reinit):
 		self.newestProcess = str()
 		self.newestMailSig = str()
 		self.compiled = self.compileDefault()
@@ -181,8 +180,9 @@ class Mail(object):
 		self.instruction = self.buildHowTo()
 		self.c = Communicator()
 		self.thread_and_subj = (str(), str())
-		print ('cleaning communications')
-		self.clean()
+		if not reinit:
+			print ('cleaning communications')
+			self.clean()
 
 	def buildHowTo(self):
 		return """
@@ -277,11 +277,12 @@ class Mail(object):
 		# set self.thread here
 		# Set self.newestMailSig here
 		orders = self.c.ListMessagesFromSender(self.c.server, self.c.master_name)
-		#print(len(orders))
 		flag = False
 		i = 0
 		while i < len(orders) and orders[i]['id'] != self.newestProcess:
+			#print(i)
 			mail_i = self.c.GetMessage(self.c.server, orders[i]['id'])
+			#print(mail_i)
 			if i == 0:
 				flag = True
 				self.newestMailSig = orders[0]['id']
@@ -319,18 +320,18 @@ class Mail(object):
 			if sig == 'qry':
 				if len(order) == 1:
 					kind = 'jnal'
-			else:
-				try:
-					temp = int(order[1])
-					kind = 'jnal'
-				except:
-					if '/' in order[1]:
-						kind = 'tenw'
-					else:
-						if order[1].lower() == 'ten':
+				else:
+					try:
+						temp = int(order[1])
+						kind = 'jnal'
+					except:
+						if '/' in order[1]:
 							kind = 'tenw'
 						else:
-							kind = 'wtab'
+							if order[1].lower() == 'ten':
+								kind = 'tenw'
+							else:
+								kind = 'wtab'
 			if sig == 'del':
 				if '/' in order[1]:
 					kind = 'tenw'

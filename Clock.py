@@ -1,4 +1,6 @@
 from time import sleep
+import sys
+from Mail import *
 
 class Clock(object):
 	def __init__(self, interval = 5.0, notiSoon = 10, dayend = 2340):
@@ -7,6 +9,7 @@ class Clock(object):
 		self.dayend = dayend
 		self.sent = False
 		self.exit = False
+		self.mailReInit = False
 
 	def config(self, new_conf):
 		if new_conf[0] > 0:
@@ -81,21 +84,23 @@ class Clock(object):
 			mail.send(plan.mailFormat())
 			self.sent = True
 
-	def run(self, time, tenw, wtab, jnal, plan, mail):
-		print "running loop"
+	def run(self, time, tenw, wtab, jnal, plan):
+		mail = Mail(self.mailReInit)
+		print 'mail: On'
+		print 'enter loop'
 		while not self.exit:
 			try:
 			# Infinite loop until master send EXIT email.
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
 				sleep(self.interval)
 			except:
-				print '\nsomething wrong, skipped to next loop'
-				sleep(self.interval)
-		
-		print "\ndump plan and journal before exiting"
-		plan.dump()
-		jnal.logdown(time)
-
-		print "clean and say goodbye"
-		mail.clean()
-		mail.sendExit()
+				print '\n error: {}'.format(str(sys.exc_info()[0]))
+				print 'reinitialise mail'
+				self.mailReInit = True
+				break
+		if self.exit:
+			print "clean and say goodbye"
+			mail.clean()
+			mail.sendExit()
+		else:
+			print 'mail: Off'
