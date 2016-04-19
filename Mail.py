@@ -318,7 +318,8 @@ class Mail(object):
 			# To solve ambiguity in kind
 			if sig == 'qry':
 				if len(order) == 1:
-					continue
+					kind = 'jnal'
+			else:
 				try:
 					temp = int(order[1])
 					kind = 'jnal'
