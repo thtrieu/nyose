@@ -166,11 +166,11 @@ class Communicator(object):
 
 
 class Mail(object):
-	def __init__(self, reinit):
-		self.newestMailSig = str()
-		self.file = 'newestProcess'
+	def __init__(self, reinit, file = 'newest'):
+		self.file = file
 		with open(self.file, 'r') as f:
 			self.newestProcess = f.read()
+		self.newestMailSig = self.newestProcess
 		self.compiled = self.compileDefault()
 		self.sigs = {'plan': ['del','add','fix','mov'],
 				'jnal': ['fin','log','qry'],
@@ -282,9 +282,7 @@ class Mail(object):
 		flag = False
 		i = 0
 		while i < len(orders) and orders[i]['id'] != self.newestProcess:
-			#print(i)
 			mail_i = self.c.GetMessage(self.c.server, orders[i]['id'])
-			#print(mail_i)
 			if i == 0:
 				flag = True
 				self.newestMailSig = orders[0]['id']
@@ -486,6 +484,7 @@ class Mail(object):
 
 	def doTenWeek(self, time, plan, tenw, dayend):
 		flag = False
+		plan_changed = False
 		doings = self.compiled['tenw']
 		for item in doings:
 			if item[0] == 'qry':

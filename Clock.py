@@ -39,10 +39,9 @@ class Clock(object):
 		# Priority 02: Order from the master
 		mail.update()
 		if mail.received(): # Set latest processed received email Sigature here
+			time.update()
 			print 'received order at {} of {}'.format(
 				time.timeStamp, time.tdSig)
-			time.update()
-
 			self.config(mail.conf())
 			if mail.howto():
 				mail.doHowto()
@@ -71,8 +70,11 @@ class Clock(object):
 			print "clean communications"
 			mail.clean()
 			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
+			mail.send(plan.leftoverMailFormat())
 			self.sent = False
 		
+		# Basically system just start = day end - log down.
+		# self.sent is the bridge.
 		# Priority 04: System just start
 		if not self.sent:
 

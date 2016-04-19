@@ -89,6 +89,26 @@ class Plan(object):
 		self.dump()
 		self.noti = set([])
 
+	def leftoverMailFormat(self, planDate = ''):
+		if planDate == '':
+			planDate = self.newestPlanSig
+		mail = dict()
+		if planDate == self.newestPlanSig:
+			planList = self.newestPlanList
+		else
+			planList = self.getPlanList(planDate)
+		key = 'not marked done in {}'.format(planDate)
+		mail[key] = list()
+		todos = planList['TODO']
+		for todo in todos:
+			if '[DONE]' not in todo:
+				mail[key].append(todo)
+		if mail[key] == list():
+			del mail[key]
+			mail[''] = 'Congratulations, no leftover at all.'
+		mail['title'] = 'What is left from {}?'.format(planDate)
+		return mail
+
 	def mailFormat(self, planDate = ''):
 		if planDate == '':
 			planDate = self.newestPlanSig
