@@ -277,10 +277,10 @@ class TenWeek(object):
 			if order[0].lower() == 'ten':
 				return self.calendar()
 			else:
-				from_str = to_str = self.dateRegul(order[0],time)
+				from_str = to_str = self.dateRegul(order[0],time.tdSig)
 		if len(order) == 2:
-			from_str = self.dateRegul(order[0],time)
-			to_str = self.dateRegul(order[1],time)
+			from_str = self.dateRegul(order[0],time.tdSig)
+			to_str = self.dateRegul(order[1],time.tdSig)
 		dayList = time.daySeri(from_str, to_str)
 		content = ['events from {} to {}:'.format(
 			from_str, to_str)]
