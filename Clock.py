@@ -83,19 +83,19 @@ class Clock(object):
 
 	def run(self, time, tenw, wtab, jnal, plan, mail):
 		print "running loop"
-		try:
+		while not self.exit:
+			try:
 			# Infinite loop until master send EXIT email.
-			while not self.exit:
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
 				sleep(self.interval)
-		except:
+			except:
 				print '\nsomething wrong, skipped to next loop'
 				sleep(self.interval)
-		finally:
-			print "\ndump plan and journal before exiting"
-			plan.dump()
-			jnal.logdown(time)
+		
+		print "\ndump plan and journal before exiting"
+		plan.dump()
+		jnal.logdown(time)
 
-			print "clean and say goodbye"
-			mail.clean()
-			mail.sendExit()
+		print "clean and say goodbye"
+		mail.clean()
+		mail.sendExit()
