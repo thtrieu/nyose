@@ -3,10 +3,11 @@ import sys
 from Mail import *
 
 class Clock(object):
-	def __init__(self, interval = 5.0, notiSoon = 10, dayend = 2340):
+	def __init__(self, interval = 5.0, notiSoon = 10, dayend = 2340, refMail = 60):
 		self.interval = interval
 		self.notiSoon = notiSoon
 		self.dayend = dayend
+		self.refMail = refMail
 		self.sent = False
 		self.exit = False
 		self.mailReInit = False
@@ -21,7 +22,10 @@ class Clock(object):
 		if new_conf[2] > 0:
 			print "change dayend point"
 			self.dayend = int(new_conf[2])
-		if new_conf[3]:
+		if new_conf[3] > 0:
+			print "change refresh Mail interval"
+			self.refMail = int(new_conf[3])
+		if new_conf[4]:
 			print "received terminal signal"
 			self.exit = True
 
@@ -69,8 +73,8 @@ class Clock(object):
 			plan.dump()
 			print "clean communications"
 			mail.clean()
-			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
 			mail.send(plan.leftoverMailFormat())
+			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
 			self.sent = False
 		
 		# Basically system just start = day end - log down.
@@ -90,10 +94,18 @@ class Clock(object):
 		mail = Mail(self.mailReInit)
 		print 'mail: On'
 		print 'enter loop'
+		time.update()
+		start = time.timeStamp
 		while not self.exit:
 			try:
 			# Infinite loop until master send EXIT email.
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
+				if time.minus(time.timeStamp, start) >= self.refMail:
+					print("Time to refresh mail connection")
+					plan.dump()
+					jnal.logdown(time)
+					self.mailReInit = True
+					break
 				sleep(self.interval)
 			except:
 				err = str(sys.exc_info()[0])

@@ -176,7 +176,7 @@ class Mail(object):
 				'jnal': ['fin','log','qry'],
 				'wtab': ['set','qry'],
 				'tenw': ['qry','mig','pin','dln','sbm','del'],
-				'conf': ['int','nti','dye','kil'],
+				'conf': ['int','nti','dye','ref','kil'],
 				'mail': ['how']}
 		self.composing = dict()
 		self.instruction = self.buildHowTo()
@@ -255,7 +255,7 @@ class Mail(object):
 
 	def compileDefault(self):
 		default = dict()
-		default['conf'] = [0, 0, 0, False]
+		default['conf'] = [0, 0, 0, 0, False]
 		return default
 
 	#=======================+
@@ -382,8 +382,10 @@ class Mail(object):
 				self.compiled['conf'][1] = int(order[1])
 			if sig == 'dye':
 				self.compiled['conf'][2] = int(order[1])
+			if sig == 'ref':
+				self.compiled['conf'][3] = int(order[1])
 			if sig == 'kil':
-				self.compiled['conf'][3] = True
+				self.compiled['conf'][4] = True
 			
 			# Now for the rest cases
 			if kind != 'conf': 
