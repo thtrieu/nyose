@@ -438,7 +438,7 @@ class Mail(object):
 	def sendExit(self):
 		mail = dict()
 		mail['title'] = 'exit'
-		mail[''] = ["bluetime terminated. We've been through great time"]
+		mail['message'] = ["bluetime terminated. We've been through great time"]
 		self.send(mail)
 
 	#======================+
@@ -512,6 +512,7 @@ class Mail(object):
 				flag = True
 			if item[0] == 'del':
 				plan_changed = self.compose(item, tenw.delete, time.tdSig, item[1:])
+				flag = True
 		if flag:
 			self.sendSeparate(tenw.todayDlMailFormat(time, dayend))
 		if plan_changed is True:

@@ -49,7 +49,7 @@ class WeekTable(object):
 	def wholetable(self):
 		mail = dict()
 		mail['transfer'] = 'your current week table'
-		mail[''] = 'not yet implemented'
+		mail['message'] = 'not yet implemented'
 		return mail
 
 	def tableQuery(self, order):

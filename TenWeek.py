@@ -239,7 +239,7 @@ class TenWeek(object):
 			del self.tenw[date]
 			mail['tenw'] = 'deleted whole {}'.format(date)
 			self.dump()
-			return date
+			return mail
 		if order[1].lower() == 'td':
 			kind = 'TODO'
 		else:
@@ -328,5 +328,5 @@ class TenWeek(object):
 	def calendar(self):
 		mail = dict()
 		mail['transfer'] = 'next ten weeks calendar'
-		mail[''] = 'not yet implemented'
+		mail['message'] = 'not yet implemented'
 		return mail
