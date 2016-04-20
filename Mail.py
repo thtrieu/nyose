@@ -61,8 +61,8 @@ class Communicator(object):
 			d_i = d[i]
 			d_i = d_i.strip()
 			# to detect quoting in replies
-			s = '<{}>'.format(self.server_name)
-			m = '<{}>'.format(self.master_name)
+			s = '{}'.format(self.server_name)
+			m = '{}'.format(self.master_name)
 			if s in d_i or m in d_i:
 				break
 			if d_i == '': continue
@@ -182,6 +182,7 @@ class Mail(object):
 		self.instruction = self.buildHowTo()
 		self.c = Communicator()
 		self.thread_and_subj = (str(), str())
+		self.sendSeparateList = dict()
 		if not reinit:
 			print ('cleaning communications')
 			self.clean()
@@ -198,7 +199,7 @@ class Mail(object):
 			add <char/stamp/todo> <content> 
 
 			# To change content of a plan item
-			cha <?char/stamp>:todo <num> <content>
+			fix <?char/stamp>:todo <num> <content>
 
 			# To move a todo item to a timed item
 			mov <num> <char/stamp>
@@ -228,7 +229,7 @@ class Mail(object):
 			mig <?char>:todo <num>
 
 			# To pin a todo onto caledar
-			pin <?date> <content> 
+			pin <?date>:tomorrow <content> 
 
 			# To pin a deadline onto calendar
 			dln <date> <content>
@@ -237,7 +238,7 @@ class Mail(object):
 			sbm <num> <num> <num>...
 
 			# To query the 10-week calendar
-			ten
+			qry ten
 
 			# To set a new interval
 			int <num>
@@ -489,7 +490,7 @@ class Mail(object):
 				self.compose(item, plan.change, item[1:])
 			if item[0] == 'mov':
 				self.compose(item, plan.move, item[1:])
-		self.send(plan.mailFormat())
+		self.sendSeparate(plan.mailFormat())
 
 	def doTenWeek(self, time, plan, tenw, dayend):
 		flag = False
@@ -500,7 +501,7 @@ class Mail(object):
 				self.compose(item, tenw.query, time, item[1:])
 			if item[0] == 'mig':
 				self.compose(item, tenw.migrate, time, plan, item[1:])
-				self.send(plan.mailFormat())
+				self.sendSeparate(plan.mailFormat())
 			if item[0] == 'pin':
 				self.compose(item, tenw.pin, time, item[1:])
 			if item[0] == 'dln':
@@ -512,16 +513,16 @@ class Mail(object):
 			if item[0] == 'del':
 				plan_changed = self.compose(item, tenw.delete, time.tdSig, item[1:])
 		if flag:
-			self.send(tenw.todayDlMailFormat(time, dayend))
+			self.sendSeparate(tenw.todayDlMailFormat(time, dayend))
 		if plan_changed is True:
-			self.send(plan.mailFormat())
+			self.sendSeparate(plan.mailFormat())
 
 	def doJournal(self, plan, jnal, time):
 		doings = self.compiled['jnal']
 		for item in doings:
 			if item[0] == 'fin':
 				self.compose(item, jnal.finish, item[1:], plan, time)
-				self.send(plan.mailFormat())
+				self.sendSeparate(plan.mailFormat())
 			if item[0] == 'log':
 				self.compose(item, jnal.log, item[1:], time)
 			if item[0] == 'qry':
@@ -574,6 +575,9 @@ class Mail(object):
 				else:
 					self.composing[key] = [mailPart[key]]
 
+	def sendSeparate(self, mailFormat):
+		self.sendSeparateList[mailFormat['title']] = mailFormat
+
 	def composeSeparateAndSend(self, part, title):
 		composing = self.composing
 		thread_and_subj = self.thread_and_subj
@@ -595,3 +599,6 @@ class Mail(object):
 		self.composing = dict()
 		self.thread_and_subj = (str(), str())
 		self.compiled = self.compileDefault()
+		for key in self.sendSeparateList:
+			self.send(self.sendSeparateList[key])
+		self.sendSeparateList = dict()

@@ -53,5 +53,5 @@ class Journal(object):
 			content += ['\n>> {}:'.format(jnal)] + retrieved.split('\n')
 		mail['jnal'] = '\n\t'.join(content)
 		if len(content) >= 15:
-			mail['transfer'] = content[0]
+			mail['transfer'] = 'journal review'
 		return mail
