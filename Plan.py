@@ -95,7 +95,7 @@ class Plan(object):
 		mail = dict()
 		if planDate == self.newestPlanSig:
 			planList = self.newestPlanList
-		else
+		else:
 			planList = self.getPlanList(planDate)
 		key = 'not marked done in {}'.format(planDate)
 		mail[key] = list()
