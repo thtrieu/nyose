@@ -208,7 +208,7 @@ class Plan(object):
 				self.keys.append(key)
 				self.keys.sort()
 			mail['plan'] = "Moved todo #{}: '{}' to timed {}".format(
-				todo_i, content, key)
+				todo_i+1, content, key)
 		except:
 			print 'go except'
 			if len(order[0]) == 1:

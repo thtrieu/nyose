@@ -408,6 +408,15 @@ class Mail(object):
 
 		keys = mail.keys()
 		keys.sort()
+		
+		# delete the redundant
+		i = 0
+		while i < len(keys):
+			if keys[i] == '':
+				del keys[i]
+				i -= 1
+			i += 1
+
 		manyKey = int(len(keys) > 1)
 		for i in range(0,len(keys)):
 			key = keys[i]
