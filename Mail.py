@@ -298,7 +298,7 @@ class Mail(object):
 				self.newestMailSig = orders[0]['id']
 				self.thread_and_subj = (orders[0]['threadId'], mail_i[0])
 				self.compiled['compile'] = list()
-			self.compiled['compile'] += mail_i[1]
+			self.compiled['compile'] = mail_i[1] + self.compiled['compile']
 			i += 1
 		if not flag: return
 		self.parse()
