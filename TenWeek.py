@@ -182,6 +182,8 @@ class TenWeek(object):
 			pos = 0
 			while self.todayNotice[pos][0] < date:
 				pos += 1
+				if pos == len(self.todayNotice):
+					break
 			self.todayNotice.insert(pos, (date, index, False))
 		else:
 			self.todayNotice = [(date, index, False)]
@@ -215,14 +217,21 @@ class TenWeek(object):
 			date = time.tdSig
 		mail['title'] = 'deadlines notices of {}'.format(date)
 		noticeList = list()
+		progress = str()
 		for dl in self.todayNotice:
-			content = "{} ({}d): ".format(
-				dl[0], time.substract(dl[0],date))
+			dist = time.substract(dl[0],date)
+			content = "{} ({}d): ".format(dl[0], dist)
 			content += "{}".format(
 				self.tenw[dl[0]]['DEADLINE'][dl[1]][0])
 			content += int(dl[2])*' [SUBMITTED]'
 			noticeList.append(content)
-		mail['notice'] = noticeList
+			freedays = dist - len(progress)/2
+			if freedays < 0 and progress != str():
+				progress = progress[:-2] + str(int(progress[-2:-1])+1) + ' '
+			elif freedays >= 0:
+				progress += '- ' * freedays + '1 '
+		mail['the list'] = noticeList
+		mail['timeline'] = ['today -> ' + progress]
 		return mail
 
 	def delete(self, tdSig, order):

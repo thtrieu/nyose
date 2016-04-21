@@ -97,7 +97,7 @@ class Clock(object):
 		time.update()
 		start = time.timeStamp
 		while not self.exit:
-			try:
+			#try:
 			# Infinite loop until master send EXIT email.
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
 				if time.minus(time.timeStamp, start) >= self.refMail:
@@ -107,18 +107,18 @@ class Clock(object):
 					self.mailReInit = True
 					break
 				sleep(self.interval)
-			except:
-				err = str(sys.exc_info()[0])
-				print '\nERROR: {}. Log down'.format(err)
-				time.update()
-				with open('ERRORLOG','a') as f:
-					f.write('{}: {}\n'.format(time.timeStamp, err))
-				print "save plan and journal"
-				plan.dump()
-				jnal.logdown(time)
-				print 'reinitialise mail'
-				self.mailReInit = True
-				break
+			# except:
+			# 	err = str(sys.exc_info()[0])
+			# 	print '\nERROR: {}. Log down'.format(err)
+			# 	time.update()
+			# 	with open('ERRORLOG','a') as f:
+			# 		f.write('{}: {}\n'.format(time.timeStamp, err))
+			# 	print "save plan and journal"
+			# 	plan.dump()
+			# 	jnal.logdown(time)
+			# 	print 'reinitialise mail'
+			# 	self.mailReInit = True
+			# 	break
 		if self.exit:
 			print "clean and say goodbye"
 			mail.clean()
