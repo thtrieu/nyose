@@ -73,7 +73,6 @@ class Clock(object):
 			plan.dump()
 			print "clean communications"
 			mail.clean()
-			mail.send(plan.leftoverMailFormat())
 			plan.sketch(time, wtab, tenw, self.dayend) # this set the newestPlan to a new one.
 			self.sent = False
 		
@@ -81,7 +80,11 @@ class Clock(object):
 		# self.sent is the bridge.
 		# Priority 04: System just start
 		if not self.sent:
-
+			if time.timeStamp >= self.dayend:
+				leftover = time.tdSig
+			else:
+				leftover = time.past(1)
+			mail.send(plan.leftoverMailFormat(leftover))
 			print "send notice list {}".format(planFor)
 			tenw.revive(planFor) # because tenw.todayNotice is not for dump and load at __init__
 			mail.send(tenw.todayDlMailFormat(time, self.dayend))
@@ -97,7 +100,7 @@ class Clock(object):
 		time.update()
 		start = time.timeStamp
 		while not self.exit:
-			#try:
+			try:
 			# Infinite loop until master send EXIT email.
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
 				if time.minus(time.timeStamp, start) >= self.refMail:
@@ -107,18 +110,18 @@ class Clock(object):
 					self.mailReInit = True
 					break
 				sleep(self.interval)
-			# except:
-			# 	err = str(sys.exc_info()[0])
-			# 	print '\nERROR: {}. Log down'.format(err)
-			# 	time.update()
-			# 	with open('ERRORLOG','a') as f:
-			# 		f.write('{}: {}\n'.format(time.timeStamp, err))
-			# 	print "save plan and journal"
-			# 	plan.dump()
-			# 	jnal.logdown(time)
-			# 	print 'reinitialise mail'
-			# 	self.mailReInit = True
-			# 	break
+			except:
+				err = str(sys.exc_info()[0])
+				print '\nERROR: {}. Log down'.format(err)
+				time.update()
+				with open('ERRORLOG','a') as f:
+					f.write('{}: {}\n'.format(time.timeStamp, err))
+				print "save plan and journal"
+				plan.dump()
+				jnal.logdown(time)
+				print 'reinitialise mail'
+				self.mailReInit = True
+				break
 		if self.exit:
 			print "clean and say goodbye"
 			mail.clean()

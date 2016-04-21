@@ -82,9 +82,7 @@ class TenWeek(object):
 				else:
 					self.tenw[dln] = {'TODO':[], 'DEADLINE': [(content, False)]}
 		
-
-	def revive(self, timeSig):
-		self.moodle()
+	def collect(self, timeSig):
 		marks = self.tenw.keys()
 		marks.sort()
 		i = 0
@@ -97,6 +95,10 @@ class TenWeek(object):
 				dln = dlns[i]
 				if not dln[1]:
 					self.todayNotice.append((mark, i, False))
+
+	def revive(self, timeSig):
+		self.moodle()
+		self.collect(timeSig)
 		self.dump()
 
 	def migrate(self, time, plan, order):
@@ -178,16 +180,7 @@ class TenWeek(object):
 			index = 0
 		
 		# Insert to today's notice list
-		if self.todayNotice != list():
-			pos = 0
-			while self.todayNotice[pos][0] < date:
-				pos += 1
-				if pos == len(self.todayNotice):
-					break
-			self.todayNotice.insert(pos, (date, index, False))
-		else:
-			self.todayNotice = [(date, index, False)]
-
+		self.collect(tdSig)
 		mail['tenw'] = "{} received deadline '{}'".format(
 			date, content)
 		self.dump()
@@ -230,8 +223,8 @@ class TenWeek(object):
 				progress = progress[:-2] + str(int(progress[-2:-1])+1) + ' '
 			elif freedays >= 0:
 				progress += '- ' * freedays + '1 '
-		mail['the list'] = noticeList
-		mail['timeline'] = ['today -> ' + progress]
+		mail['details'] = noticeList
+		mail['chart'] = ['today > ' + progress]
 		return mail
 
 	def delete(self, tdSig, order):
@@ -242,11 +235,13 @@ class TenWeek(object):
 				date)
 			self.dump()
 			return mail
+		dln = self.tenw[date]['DEADLINE'] != []
 		if len(order) == 1:
-			if date == tdSig and self.tenw[date]['DEADLINE'] != []:
+			if date == tdSig and dln:
 				mail['plan_changed'] = True
 			del self.tenw[date]
 			mail['tenw'] = 'deleted whole {}'.format(date)
+			if dln: self.collect(tdSig)
 			self.dump()
 			return mail
 		if order[1].lower() == 'td':
@@ -254,7 +249,7 @@ class TenWeek(object):
 		else:
 			kind = 'DEADLINE'
 		if len(order) == 2:
-			if date == tdSig and self.tenw[date]['DEADLINE'] != []:
+			if date == tdSig and dln:
 				mail['plan_changed'] = True
 			self.tenw[date][kind] = []
 			mail['tenw'] = "{} of {} is emptied".format(
@@ -262,6 +257,7 @@ class TenWeek(object):
 			if self.tenw[date] == {'TODO':[], 'DEADLINE':[]}:
 				del self.tenw[date]
 				mail['tenw'] += ", turn out {} is now empty, deleted it.".format(date)
+			if dln: self.collect(tdSig)
 			self.dump()
 			return mail
 		num = int(order[2]) - 1
@@ -277,6 +273,7 @@ class TenWeek(object):
 		if self.tenw[date] == {'TODO':[], 'DEADLINE':[]}:
 			del self.tenw[date]
 			mail['tenw'] += ", turn out {} is now empty, deleted it.".format(date)
+		if kind == 'DEADLINE': self.collect(tdSig)
 		self.dump()
 		return mail
 
@@ -291,7 +288,7 @@ class TenWeek(object):
 			from_str = self.dateRegul(order[0],time.tdSig)
 			to_str = self.dateRegul(order[1],time.tdSig)
 		dayList = time.daySeri(from_str, to_str)
-		content = ['events from {} to {}:'.format(
+		content = ['calendar events from {} to {}:'.format(
 			from_str, to_str)]
 		for day in dayList:
 			if day in self.tenw:

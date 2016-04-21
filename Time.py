@@ -37,6 +37,11 @@ class Time(object):
 			dt_from += datetime.timedelta(1)
 		return seri
 
+	def past(self, num):
+		today  = timer.strptime(self.tdSig, self.format)
+		that = today - datetime.timedelta(num)
+		return str(that).split()[0]
+
 	def minus(self, time1, time2):
 		h1 = int(time1) / 100
 		m1 = int(time1) % 100

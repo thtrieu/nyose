@@ -1,3 +1,4 @@
+
 import os.path
 
 class Plan(object):
@@ -105,7 +106,7 @@ class Plan(object):
 				mail[key].append(todo)
 		if mail[key] == list():
 			del mail[key]
-			mail['message'] = 'Congratulations, no leftover at all.'
+			mail['message'] = ['Congratulations, no leftover at all.']
 		mail['title'] = 'What is left from {}?'.format(planDate)
 		return mail
 

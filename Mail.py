@@ -282,6 +282,7 @@ class Mail(object):
 		self.planThread = str()
 		self.evntThread = str()
 		self.jnalThread = str()
+		self.caldThread = str()
 
 	def update(self):
 		# build self.compiled here, assume init with compileDefault
@@ -413,6 +414,7 @@ class Mail(object):
 		dlns = False
 		plan = False
 		jnal = False
+		cald = False
 		if self.thread_and_subj != (str(), str()):
 			thread_id = self.thread_and_subj[0]
 			subject = self.thread_and_subj[1]
@@ -422,10 +424,12 @@ class Mail(object):
 			dlns = 'deadlines' in subject
 			plan = 'plan' in subject
 			jnal = 'journal' in subject
+			cald = 'calendar' in subject
 			if evnt: thread_id = self.evntThread
 			if dlns: thread_id = self.dlnsThread
 			if plan: thread_id = self.planThread
 			if jnal: thread_id = self.jnalThread
+			if cald: thread_id = self.caldThread
 		if thread_id != str():
 			subject = 'Re: ' + subject
 		del mail['title']
@@ -461,7 +465,8 @@ class Mail(object):
 		if evnt: self.evntThread = thread_id
 		if plan: self.planThread = thread_id
 		if jnal: self.jnalThread = thread_id
-		if dlns: self.dlnsThread = thread_id 
+		if dlns: self.dlnsThread = thread_id
+		if cald: self.caldThread = thread_id
 
 	def sendExit(self):
 		mail = dict()
@@ -571,7 +576,7 @@ class Mail(object):
 	#====================+
 
 	def compose(self, item, obj, *args, **kwargs):
-		#try:
+		try:
 			mailPart = obj(*args, **kwargs)
 			flag = False
 			if 'plan_changed' in mailPart:
@@ -579,9 +584,9 @@ class Mail(object):
 				del mailPart['plan_changed']
 			self.composeSuccess(mailPart)
 			return flag
-		# except:
-		# 	err = str(sys.exc_info()[0])
-		# 	self.composeFailure("{} : {}".format(str(item), err))
+		except:
+			err = str(sys.exc_info()[0])
+			self.composeFailure("{} : {}".format(str(item), err))
 
 	def composeFailure(self, mess):
 		key = 'execute fail'
