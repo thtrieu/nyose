@@ -528,6 +528,10 @@ class Mail(object):
 	def doTenWeek(self, time, plan, tenw, dayend):
 		flag = False
 		plan_changed = False
+		if time.timeStamp >= dayend:
+			planFor = time.tmrSig
+		else:
+			planFor = time.tdSig
 		doings = self.compiled['tenw']
 		for item in doings:
 			if item[0] == 'qry':
@@ -538,17 +542,18 @@ class Mail(object):
 			if item[0] == 'pin':
 				self.compose(item, tenw.pin, time, item[1:])
 			if item[0] == 'dln':
-				plan_changed = self.compose(item, tenw.deadline, time.tdSig, item[1:])
+				plan_changed = self.compose(item, tenw.deadline, planFor, item[1:])
 				flag = True
 			if item[0] == 'sbm':
-				plan_changed = self.compose(item, tenw.submitted, time.tdSig, item[1:])
+				plan_changed = self.compose(item, tenw.submitted, planFor, item[1:])
 				flag = True
 			if item[0] == 'del':
-				plan_changed = self.compose(item, tenw.delete, time.tdSig, item[1:])
+				plan_changed = self.compose(item, tenw.delete, planFor, item[1:])
 				flag = True
 		if flag:
 			self.sendSeparate(tenw.todayDlMailFormat(time, dayend))
 		if plan_changed is True:
+			plan.newestPlanList['DEADLINE'] = tenw.dlns(planFor)
 			self.sendSeparate(plan.mailFormat())
 
 	def doJournal(self, plan, jnal, time):
