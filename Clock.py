@@ -104,7 +104,8 @@ class Clock(object):
 			# Infinite loop until master send EXIT email.
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
 				if time.minus(time.timeStamp, start) >= self.refMail:
-					print("Time to refresh mail connection")
+					print("time to refresh mail connection")
+					# For safety, not necessary dump plan and jnal here
 					plan.dump()
 					jnal.logdown(time)
 					self.mailReInit = True
@@ -117,6 +118,7 @@ class Clock(object):
 				with open('ERRORLOG','a') as f:
 					f.write('{}: {}\n'.format(time.timeStamp, err))
 				print "save plan and journal"
+				# For safety, not necessary dump plan and jnal here
 				plan.dump()
 				jnal.logdown(time)
 				print 'reinitialise mail'
