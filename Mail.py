@@ -168,8 +168,7 @@ class Communicator(object):
 class Mail(object):
 	def __init__(self, reinit, file = 'newest'):
 		self.file = file
-		with open(self.file, 'r') as f:
-			self.newestProcess = f.read()
+		self.load()
 		self.newestMailSig = self.newestProcess
 		self.compiled = self.compileDefault()
 		self.sigs = {'plan': ['del','add','fix','mov'],
@@ -183,10 +182,6 @@ class Mail(object):
 		self.c = Communicator()
 		self.thread_and_subj = (str(), str())
 		self.sendSeparateList = dict()
-		self.planThread = str()
-		self.dlnsThread = str()
-		self.evntThread = str()
-		self.jnalThread = str()
 		if not reinit:
 			print ('cleaning communications')
 			self.clean()
@@ -628,13 +623,33 @@ class Mail(object):
 		self.thread_and_subj = thread_and_subj
 		self.composing = composing
 
+	def load(self):
+		with open(self.file,'r') as f:
+			ids = f.readlines()
+		l = len(ids)
+		if l < 6: ids += [''] * (6-l)
+		self.newestProcess = ids[0].strip()
+		self.evntThread = ids[1].strip()
+		self.planThread = ids[2].strip()
+		self.dlnsThread = ids[3].strip()
+		self.jnalThread = ids[4].strip()
+		self.caldThread = ids[5].strip()
+
+	def dump(self):
+		with open(self.file,'w') as f:
+			f.write(self.newestProcess+'\n')
+			f.write(self.evntThread+'\n')
+			f.write(self.planThread+'\n')
+			f.write(self.dlnsThread+'\n')
+			f.write(self.jnalThread+'\n')
+			f.write(self.caldThread)
+
 	def allProcessed(self):
 		self.composing['title'] = 'order served'
 		if len(self.composing.keys()) != 1:
 			self.send(self.composing)
 		self.newestProcess = self.newestMailSig
-		with open(self.file, 'w') as f:
-			f.write(self.newestProcess)
+		self.dump()
 		self.composing = dict()
 		self.thread_and_subj = (str(), str())
 		self.compiled = self.compileDefault()
