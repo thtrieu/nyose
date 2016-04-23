@@ -1,4 +1,3 @@
-
 import os.path
 
 class Plan(object):
@@ -165,7 +164,6 @@ class Plan(object):
 				key, order[1], change, to)
 		return mail
 
-
 	def delete(self, order): # return a mailPart
 		mail = dict()
 		if len(order) == 1:
@@ -189,29 +187,47 @@ class Plan(object):
 	def move(self, order):
 		print order
 		mail = dict()
-		try:
+		try: # Move todo -> somewhere
 			todo_i = int(order[0])-1
 			if todo_i > 100: #commit suicide
 				temp = int('a')
-			print 'go try'
 			content = self.newestPlanList['TODO'][todo_i]
 			del self.newestPlanList['TODO'][todo_i]
+			try: # Merge todos
+				todo_j = int(order[1])-1
+				if todo_j > 100: #commit suicide
+					temp = int('a')
+				if (todo_i == todo_j):
+					self.newestPlanList['TODO'].insert(todo_i, content)
+					mail['plan'] = "move from {} to {}??".format(todo_i, todo_j)
+				else:
+					inc = int(todo_j > todo_i)
+					todo_j -= inc
+					self.newestPlanList['TODO'][todo_j] += '; ' + content
+					mail['plan'] = "merged todo {} and {}".format(
+						todo_i+1, todo_j + inc + 1)
+			except: # Move todo -> timed
+				if len(order[1]) == 1:
+					time_i = ord(order[1])-97
+					key = self.keys[time_i]	
+				else:
+					key = int(order[1])
+				if len(order) == 2: # append
+					if key in self.newestPlanList:
+						self.newestPlanList[key].append(content)
+					else:
+						self.newestPlanList[key] = [content]
+						self.keys.append(key)
+						self.keys.sort()
+					mail['plan'] = "moved todo #{}: '{}' to timed {}".format(
+						todo_i+1, content, key)
+				else: # merge
+					num = int(order[2])-1
+					self.newestPlanList[key][num] += '; ' + content
+					mail['plan'] = "merged todo {} and timed {}#{}".format(
+						todo_i+1, key, num+1)
 
-			if len(order[1]) == 1:
-				time_i = ord(order[1])-97
-				key = self.keys[time_i]	
-			else:
-				key = int(order[1])
-			if key in self.newestPlanList:
-				self.newestPlanList[key].append(content)
-			else:
-				self.newestPlanList[key] = [content]
-				self.keys.append(key)
-				self.keys.sort()
-			mail['plan'] = "Moved todo #{}: '{}' to timed {}".format(
-				todo_i+1, content, key)
-		except:
-			print 'go except'
+		except: # Move timed -> somewhere
 			if len(order[0]) == 1:
 				time_i = ord(order[0])-97
 				key = self.keys[time_i]
@@ -219,16 +235,61 @@ class Plan(object):
 				key = int(order[0])
 			num = int(order[1])-1
 			content = self.newestPlanList[key][num]
-			self.newestPlanList['TODO'].append(content)
 			del self.newestPlanList[key][num]
 			if len(self.newestPlanList[key]) == 0:
 				del self.newestPlanList[key]
 				self.keys = self.newestPlanList.keys()
 				self.keys.sort()
-			mail['plan'] = "Moved timed {}#{}: '{}' to TODO".format(
-				key, num+1, content)
+			if len(order) == 2: # Move timed -> TODO
+				self.newestPlanList['TODO'].append(content)
+				mail['plan'] = "moved timed {}#{}: '{}' to TODO".format(
+					key, num+1, content)
+			else: # Merge timed -> TODO or move timed -> time
+				try: # Merge timed -> TODO
+					todo_i = int(order[2]) - 1
+					if todo_i > 100: #commit suicide
+						temp = int('a') 
+					self.newestPlanList['TODO'][todo_i] += '; ' + content
+					mail['plan'] = "merged timed {}#{}: '{}' into todo {}".format(
+						key, num+1, content, todo_i+1)
+				except: # Move timed -> somewhere not todo
+					if len(order[2]) == 1:
+						time_i_ = ord(order[2])-97
+						key_ = self.keys[time_i_]
+					else:
+						key_ = int(order[2])
+					if len(order) == 3: # Move timed to another
+						if key_ in self.newestPlanList:
+							self.newestPlanList[key_].append(content)
+						else:
+							self.newestPlanList[key_] = [content]
+							self.keys.append(key_)
+							self.keys.sort()
+						mail['plan'] = "moved timed {}#{}: '{}' to timed {}".format(
+							key, num+1, content, key_)
+					else: #len == 4, merge two timed
+						num_ = int(order[3])-1
+						if key == key_:
+							if num == num_:
+								mail['plan'] = "moved timed {}#{} to {}#{} ??".format(
+									key, num+1, key_, num_+1)
+								if key in self.newestPlanList:
+									self.newestPlanList[key].insert(num, content)
+								else:
+									self.newestPlanList[key] = [content]
+									self.keys.append(key)
+									self.keys.sort()
+							else:
+								inc =  int(num_ > num)
+								num_ -= inc
+								self.newestPlanList[key][num_] += '; ' + content
+								mail['plan'] = 'merged timed {}#{} to {}#{}.'.format(
+									key, num+1, key_, num_+inc+1)
+						else:
+							self.newestPlanList[key_][num_] += '; '+ content
+							mail['plan'] = 'merged time {}#{} to {}#{}.'.format(
+								key, num+1, key_, num_+1)
 		return mail
 
-	def finish(self, order):
-		todo_i = int(order[0])-1
+	def finish(self, todo_i):
 		self.newestPlanList['TODO'][todo_i] += ' [DONE]'

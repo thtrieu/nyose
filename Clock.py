@@ -3,14 +3,17 @@ import sys
 from Mail import *
 
 class Clock(object):
-	def __init__(self, interval = 5.0, notiSoon = 10, dayend = 2340, refMail = 60):
+	def __init__(self, debug = False, interval = 5.0, 
+		notiSoon = 10, dayend = 2340, refMail = 60):
 		self.interval = interval
 		self.notiSoon = notiSoon
 		self.dayend = dayend
 		self.refMail = refMail
+		self.debug = debug
 		self.sent = False
 		self.exit = False
 		self.mailReInit = False
+		self.pwIssue = False
 
 	def config(self, new_conf):
 		if new_conf[0] > 0:
@@ -94,7 +97,7 @@ class Clock(object):
 			self.sent = True
 
 	def run(self, time, tenw, wtab, jnal, plan):
-		mail = Mail(self.mailReInit)
+		mail = Mail(self.mailReInit, self.debug)
 		print 'mail: On'
 		print 'enter loop'
 		time.update()
@@ -112,6 +115,8 @@ class Clock(object):
 					break
 				sleep(self.interval)
 			except:
+				if self.debug:
+					raise
 				err = str(sys.exc_info()[0])
 				print '\nERROR: {}. Log down'.format(err)
 				time.update()
@@ -121,10 +126,16 @@ class Clock(object):
 				# For safety, not necessary dump plan and jnal here
 				plan.dump()
 				jnal.logdown(time)
-				print 'reinitialise mail'
-				self.mailReInit = True
+				if err == "<class 'httplib2.ServerNotFoundError'>":
+					print "Big issue. sleep for long and reinitialise"
+					sleep(self.interval * 20)
+					self.exit = True
+					self.pwIssue = True
+				else:
+					print 'reinitialise mail'
+					self.mailReInit = True
 				break
-		if self.exit:
+		if self.exit and not self.pwIssue:
 			print "clean and say goodbye"
 			mail.clean()
 			mail.sendExit()

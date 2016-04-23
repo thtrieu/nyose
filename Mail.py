@@ -37,22 +37,21 @@ class Communicator(object):
 	def ListMessagesFromSender(self, service, sender):
 		user_id = 'me'
 		query = 'from:{}'.format(sender)
-		while True:
-			try:
-				response = service.users().messages().list(userId=user_id,q=query).execute()
-				messages = []
-				if 'messages' in response:
-					messages.extend(response['messages'])
+		try:
+			response = service.users().messages().list(userId=user_id,q=query).execute()
+			messages = []
+			if 'messages' in response:
+				messages.extend(response['messages'])
 
-				while 'nextPageToken' in response:
-					page_token = response['nextPageToken']
-					response = service.users().messages().list(userId=user_id, q=query, pageToken=page_token).execute()
-					messages.extend(response['messages'])
+			while 'nextPageToken' in response:
+				page_token = response['nextPageToken']
+				response = service.users().messages().list(userId=user_id, q=query, pageToken=page_token).execute()
+				messages.extend(response['messages'])
 
-				return messages
-			except errors.HttpError, error:
-				print('An error occurred: {}'.format(error))
-				time.sleep(5)
+			return messages
+		except errors.HttpError, error:
+			print('An error occurred: {}'.format(error))
+			return False
 	#Used
 	def pretty(self, decode):
 		d = decode.split('\n')
@@ -71,33 +70,31 @@ class Communicator(object):
 	#Used
 	def GetMessage(self, service, msg_id):
 		user_id = 'me'
-		while True:
-			try:
-				message = service.users().messages().get(userId=user_id, id=msg_id, format=u'full').execute()
-				raw = message['payload']['parts'][0]['body']['data']
-				hds = message['payload']['headers']
-				subject = str()
-				for hd in hds:
-					if hd['name'] == 'Subject':
-						subject = hd['value']
-						break
-				#print (subject)
-				decoded = base64.urlsafe_b64decode(str(raw))
-				return (subject, self.pretty(decoded))
-			except errors.HttpError, error:
-				print('An error occurred: {}'.format(error))
-				time.sleep(5)
+		try:
+			message = service.users().messages().get(userId=user_id, id=msg_id, format=u'full').execute()
+			raw = message['payload']['parts'][0]['body']['data']
+			hds = message['payload']['headers']
+			subject = str()
+			for hd in hds:
+				if hd['name'] == 'Subject':
+					subject = hd['value']
+					break
+			#print (subject)
+			decoded = base64.urlsafe_b64decode(str(raw))
+			return (subject, self.pretty(decoded))
+		except errors.HttpError, error:
+			print('An error occurred: {}'.format(error))
+			return False
 	#Used
 	def SendMessage(self, service, message):
 		user_id = 'me'
-		while True:
-			try:
-				message = (service.users().messages().send(
-					userId=user_id, body=message).execute())
-				return message
-			except errors.HttpError, error:
-				print('An error occurred: {}'.format(error))
-				time.sleep(5)
+		try:
+			message = (service.users().messages().send(
+				userId=user_id, body=message).execute())
+			return message
+		except errors.HttpError, error:
+			print('An error occurred: {}'.format(error))
+			return False
 	#Used
 	def CreateMessage(self, sender, to, subject, 
 		message_text, thread_id = ''):
@@ -155,19 +152,19 @@ class Communicator(object):
 	#Used
 	def DeleteThread(self, service, thread_id):
 		user_id = 'me'
-		while True:
-			try:
-				m = (service.users().threads().delete(
-									userId=user_id,id=thread_id).execute())
-				return m
-			except errors.HttpError, error:
-				print('An error occurred: {}'.format(error))
-				time.sleep(5)
+		try:
+			m = (service.users().threads().delete(
+								userId=user_id,id=thread_id).execute())
+			return m
+		except errors.HttpError, error:
+			print('An error occurred: {}'.format(error))
+			return False
 
 
 class Mail(object):
-	def __init__(self, reinit, file = 'newest'):
+	def __init__(self, reinit, debug, file = 'newest'):
 		self.file = file
+		self.debug = debug
 		self.load()
 		self.newestMailSig = self.newestProcess
 		self.compiled = self.compileDefault()
@@ -183,8 +180,14 @@ class Mail(object):
 		self.thread_and_subj = (str(), str())
 		self.sendSeparateList = dict()
 		if not reinit:
-			print ('cleaning communications')
+			print ('clean communications')
 			self.clean()
+
+	def reset(self):
+		print('reset communicator')
+		del self.c
+		self.c = Communicator()
+		time.sleep(5)
 
 	def buildHowTo(self):
 		return """
@@ -261,15 +264,28 @@ class Mail(object):
 	# API Related functions |
 	#=======================+
 
+	def tryUntil(self, obj, *args, **kwargs):
+		flag = False
+		while not flag:
+			r = obj(*args, **kwargs)
+			if r is False:
+				self.reset()
+			else:
+				flag = True
+		return r
+
 	def clean(self):
 		
 		def clean_ft(from_name, to_service):
-			messes = self.c.ListMessagesFromSender(to_service, from_name)
+			messes = self.tryUntil(
+				self.c.ListMessagesFromSender, 
+				to_service, from_name)
 			threadIds = set()
 			for mess in messes:
 				threadIds.add(mess['threadId'])
 			for threadId in threadIds:
-				self.c.DeleteThread(to_service, threadId)
+				_ = self.tryUntil(self.c.DeleteThread,
+					to_service, threadId)
 
 		clean_ft(self.c.master_name, self.c.server)
 		clean_ft(self.c.server_name, self.c.master)
@@ -283,11 +299,15 @@ class Mail(object):
 		# build self.compiled here, assume init with compileDefault
 		# set self.thread here
 		# Set self.newestMailSig here
-		orders = self.c.ListMessagesFromSender(self.c.server, self.c.master_name)
+		orders = self.tryUntil(
+			self.c.ListMessagesFromSender, 
+			self.c.server, self.c.master_name)
 		flag = False
 		i = 0
 		while i < len(orders) and orders[i]['id'] != self.newestProcess:
-			mail_i = self.c.GetMessage(self.c.server, orders[i]['id'])
+			mail_i = self.tryUntil(
+				self.c.GetMessage,
+				self.c.server, orders[i]['id'])
 			if i == 0:
 				flag = True
 				self.newestMailSig = orders[0]['id']
@@ -456,7 +476,9 @@ class Mail(object):
 				message_text += ' {}\n'.format(mail_key[j].strip())
 		mes = self.c.CreateMessage(self.c.server_name, self.c.master_name, 
 			subject, message_text, thread_id)
-		thread_id = self.c.SendMessage(self.c.server, mes)['threadId']
+		thread_id = self.tryUntil(
+			self.c.SendMessage,
+			self.c.server, mes)['threadId']
 		if evnt: self.evntThread = thread_id
 		if plan: self.planThread = thread_id
 		if jnal: self.jnalThread = thread_id
@@ -466,7 +488,7 @@ class Mail(object):
 	def sendExit(self):
 		mail = dict()
 		mail['title'] = 'exit'
-		mail['message'] = ["bluetime terminated. We've been through great time"]
+		mail['message'] = ["bluetime terminated. What a ride!"]
 		self.send(mail)
 
 	#======================+
@@ -585,6 +607,8 @@ class Mail(object):
 			self.composeSuccess(mailPart)
 			return flag
 		except:
+			if self.debug:
+				raise
 			err = str(sys.exc_info()[0])
 			self.composeFailure("{} : {}".format(str(item), err))
 

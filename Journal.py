@@ -16,15 +16,20 @@ class Journal(object):
 
 	def finish(self, order, plan, time):
 		mail = dict()
-		todo_i = int(order[0])-1
-		content = plan.newestPlanList['TODO'][todo_i]
-		self.logList.append("[{}] done todo #{}: '{}'".format(
-			time.timeStamp, order[0], content))
-		mail['journal'] = "logged that at {}, done todo #{}: '{}'".format(
-			time.timeStamp, order[0], content)
-		plan.finish(order)
-		mail['plan'] = "Marked that you did todo #{}: '{}'".format(
-			order[0], content)
+		mail['plan'] = str()
+		doneList = str()
+
+		for i in range(0, len(order)):
+			todo_i = int(order[i])-1
+			content = plan.newestPlanList['TODO'][todo_i]
+			self.logList.append("[{}] done todo: '{}'".format(
+				time.timeStamp, content))
+			plan.finish(todo_i)
+			doneList.append(order[i])
+
+		doneList = ", ".join(doneList)
+		mail['journal'] =  "logged that at {}, done todo ".format(time.timeStamp) + doneList 
+		mail['plan'] = "marked that you have done todo " + doneList
 		return mail
 
 	def log(self, order, time):
