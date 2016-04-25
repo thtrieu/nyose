@@ -50,6 +50,7 @@ class Clock(object):
 			print "received terminal signal"
 			self.exit = True
 		if new_conf[5]:
+			print "received update code signal"
 			mail.composeSuccess({'clock': 'received update code signal'})
 			self.update = True
 
@@ -122,8 +123,8 @@ class Clock(object):
 		mail = ml.Mail(self.mailReInit, self.debug)
 		print 'mail: On'
 		if type(self.update) is str:
-			mail.composeSuccess({'all': '\n' + self.update})
-			mail.allProcessed()
+			mail.composeSuccess({'message': self.update})
+			mail.allProcessed('code updated')
 			self.update = False
 			print('code update confirmation sent')
 		print 'enter loop'

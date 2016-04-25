@@ -57,7 +57,7 @@ if __name__ == "__main__":
 			jnal = jn.Journal()
 			plan = pl.Plan()
 			save = tick.dump()
-			tick = cl.Clock(debug)
+			tick = cl.Clock()
 			tick.load(save)
 			del save
 

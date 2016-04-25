@@ -598,8 +598,8 @@ class Mail(object):
 			f.write(self.jnalThread+'\n')
 			f.write(self.caldThread)
 
-	def allProcessed(self):
-		self.composing['title'] = 'order served'
+	def allProcessed(self, title = 'order served'):
+		self.composing['title'] = title
 		if len(self.composing.keys()) != 1:
 			self.send(self.composing)
 		self.newestProcess = self.newestMailSig
