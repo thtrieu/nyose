@@ -616,67 +616,67 @@ class Mail(object):
 	#============+
 
 	def buildHowTo(self):
-	return """
-		# To delete a plan item
-		del <?char>:todo <num>
+		return """
+			# To delete a plan item
+			del <?char>:todo <num>
 
-		# To delete a calenda item
-		del <date> <td/dl> <num>
+			# To delete a calenda item
+			del <date> <td/dl> <num>
 
-		# To add a plan item:
-		add <char/stamp/todo> <content> 
+			# To add a plan item:
+			add <char/stamp/todo> <content> 
 
-		# To change content of a plan item
-		fix <?char/stamp>:todo <num> <content>
+			# To change content of a plan item
+			fix <?char/stamp>:todo <num> <content>
 
-		# To move a todo item to a timed item
-		mov <num> <char/stamp>
+			# To move a todo item to a timed item
+			mov <num> <char/stamp>
 
-		# To move a timed item to a todo item
-		mov <char/stamp> <num>
+			# To move a timed item to a todo item
+			mov <char/stamp> <num>
 
-		# To mark that a todo item is done
-		fin <?char>:todo <num>
+			# To mark that a todo item is done
+			fin <?char>:todo <num>
 
-		# To log a thought
-		log <content>
+			# To log a thought
+			log <content>
 
-		# To review the journal of a few recent days
-		qry <?num>:1
+			# To review the journal of a few recent days
+			qry <?num>:1
 
-		# To set new content inside the week table
-		set <wday> <?start>:0600 <?end>:start <content>
+			# To set new content inside the week table
+			set <wday> <?start>:0600 <?end>:start <content>
 
-		# To query contents from the table
-		qry <wday> <?start>:0600 <?end>:start
+			# To query contents from the table
+			qry <wday> <?start>:0600 <?end>:start
 
-		# To check todo and deadlines during a period of time
-		qry <start-date> <?end-date>:start-date
+			# To check todo and deadlines during a period of time
+			qry <start-date> <?end-date>:start-date
 
-		# To migrate a plan item to tomorrow
-		mig <?char>:todo <num>
+			# To migrate a plan item to tomorrow
+			mig <?char>:todo <num>
 
-		# To pin a todo onto caledar
-		pin <?date>:tomorrow <content> 
+			# To pin a todo onto caledar
+			pin <?date>:tomorrow <content> 
 
-		# To pin a deadline onto calendar
-		dln <date> <content>
+			# To pin a deadline onto calendar
+			dln <date> <content>
 
-		# To check a that some deadlines in notice list is submitted
-		sbm <num> <num> <num>...
+			# To check a that some deadlines in notice list is submitted
+			sbm <num> <num> <num>...
 
-		# To query the 10-week calendar
-		qry ten
+			# To query the 10-week calendar
+			qry ten
 
-		# To set a new interval
-		int <num>
+			# To set a new interval
+			int <num>
 
-		# To set a new notification time
-		nti <num>
+			# To set a new notification time
+			nti <num>
 
-		# To set a new dayend
-		dye <num>
+			# To set a new dayend
+			dye <num>
 
-		# To terminate bluetime
-		kil
-		"""
+			# To terminate bluetime
+			kil
+			"""
