@@ -32,6 +32,7 @@ if __name__ == "__main__":
 		tick.run(ml, time, tenw, wtab, jnal, plan)
 		if tick.update:
 			# TODO: Run git synchorise here
+			mess = str()
 			while True:
 				try:
 					print(">> git pull")
