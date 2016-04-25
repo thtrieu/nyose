@@ -7,7 +7,7 @@ import Time as tm
 import Mail as ml
 import sys
 import git
-from time import delay
+from time import sleep
 from subprocess import call
 
 if __name__ == "__main__":
