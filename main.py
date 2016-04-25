@@ -37,6 +37,7 @@ if __name__ == "__main__":
 					print(">> git pull")
 					mess = puller.pull()
 					print(mess)
+					tick.update = mess
 					break
 				except:
 					print("puller error, retry")
@@ -58,7 +59,6 @@ if __name__ == "__main__":
 			tick = cl.Clock(debug)
 			tick.load(save)
 			del save
-			tick.update = 'done'
 
 	print "save plan and journal"
 	plan.dump()

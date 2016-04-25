@@ -121,8 +121,9 @@ class Clock(object):
 	def run(self, ml, time, tenw, wtab, jnal, plan):
 		mail = ml.Mail(self.mailReInit, self.debug)
 		print 'mail: On'
-		if self.update == 'done':
-			mail.composeSuccess({'all': 'code updated'})
+		if type(self.update) is unicode:
+			mail.composeSuccess({'all': str(
+				'\n' + self.update)})
 			mail.allProcessed()
 			self.update = False
 			print('code update confirmation sent')
