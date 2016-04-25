@@ -27,7 +27,7 @@ if __name__ == "__main__":
 		tick.run(ml, time, tenw, wtab, jnal, plan)
 		if tick.update:
 			# TODO: Run git synchorise here
-			#call("".split())
+			call("git pull".split())
 			ml = reload(ml)
 			tm = reload(tm)
 			tw = reload(tw)
