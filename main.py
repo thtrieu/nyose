@@ -6,6 +6,8 @@ import Plan as pl
 import Time as tm
 import Mail as ml
 import sys
+import git
+from time import delay
 from subprocess import call
 
 if __name__ == "__main__":
@@ -22,6 +24,7 @@ if __name__ == "__main__":
 	tick = cl.Clock(debug) # The loop
 	print('tick: On' + int(debug)*' (debug mode)')
 
+	puller = git.cmd.Git()
 	while not tick.exit:
 		# Mail receive a special treatment since it needs
 		# to be destruct and re-construct when there is connection fault
@@ -29,8 +32,15 @@ if __name__ == "__main__":
 		tick.run(ml, time, tenw, wtab, jnal, plan)
 		if tick.update:
 			# TODO: Run git synchorise here
-			print(">> git pull")
-			call("git pull".split())
+			while True:
+				try:
+					print(">> git pull")
+					mess = puller.pull()
+					print(mess)
+					break
+				except:
+					print("puller error, retry")
+					delay(5)
 			ml = reload(ml)
 			tm = reload(tm)
 			tw = reload(tw)
