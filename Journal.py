@@ -17,7 +17,7 @@ class Journal(object):
 	def finish(self, order, plan, time):
 		mail = dict()
 		mail['plan'] = str()
-		doneList = str()
+		doneList = list()
 
 		for i in range(0, len(order)):
 			todo_i = int(order[i])-1
