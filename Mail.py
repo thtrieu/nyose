@@ -172,7 +172,7 @@ class Mail(object):
 				'jnal': ['fin','log','qry'],
 				'wtab': ['set','qry'],
 				'tenw': ['qry','mig','pin','dln','sbm','del'],
-				'conf': ['int','nti','dye','ref','kil'],
+				'conf': ['int','nti','dye','ref','kil','upd'],
 				'mail': ['how']}
 		self.composing = dict()
 		self.instruction = self.buildHowTo()
@@ -183,81 +183,9 @@ class Mail(object):
 			print ('clean communications')
 			self.clean()
 
-	def reset(self):
-		print('reset communicator')
-		del self.c
-		self.c = Communicator()
-		time.sleep(5)
-
-	def buildHowTo(self):
-		return """
-			# To delete a plan item
-			del <?char>:todo <num>
-
-			# To delete a calenda item
-			del <date> <td/dl> <num>
-
-			# To add a plan item:
-			add <char/stamp/todo> <content> 
-
-			# To change content of a plan item
-			fix <?char/stamp>:todo <num> <content>
-
-			# To move a todo item to a timed item
-			mov <num> <char/stamp>
-
-			# To move a timed item to a todo item
-			mov <char/stamp> <num>
-
-			# To mark that a todo item is done
-			fin <?char>:todo <num>
-
-			# To log a thought
-			log <content>
-
-			# To review the journal of a few recent days
-			qry <?num>:1
-
-			# To set new content inside the week table
-			set <wday> <?start>:0600 <?end>:start <content>
-
-			# To query contents from the table
-			qry <wday> <?start>:0600 <?end>:start
-
-			# To check todo and deadlines during a period of time
-			qry <start-date> <?end-date>:start-date
-
-			# To migrate a plan item to tomorrow
-			mig <?char>:todo <num>
-
-			# To pin a todo onto caledar
-			pin <?date>:tomorrow <content> 
-
-			# To pin a deadline onto calendar
-			dln <date> <content>
-
-			# To check a that some deadlines in notice list is submitted
-			sbm <num> <num> <num>...
-
-			# To query the 10-week calendar
-			qry ten
-
-			# To set a new interval
-			int <num>
-
-			# To set a new notification time
-			nti <num>
-
-			# To set a new dayend
-			dye <num>
-
-			# To terminate bluetime
-			kil
-			"""
-
 	def compileDefault(self):
 		default = dict()
-		default['conf'] = [0, 0, 0, 0, False]
+		default['conf'] = [0, 0, 0, 0, False, False]
 		return default
 
 	#=======================+
@@ -269,7 +197,7 @@ class Mail(object):
 		while not flag:
 			r = obj(*args, **kwargs)
 			if r is False:
-				self.reset()
+				time.sleep(5)
 			else:
 				flag = True
 		return r
@@ -410,6 +338,8 @@ class Mail(object):
 				self.compiled['conf'][3] = int(order[1])
 			if sig == 'kil':
 				self.compiled['conf'][4] = True
+			if sig == 'upd':
+				self.compiled['conf'][5] = True
 			
 			# Now for the rest cases
 			if kind != 'conf': 
@@ -680,3 +610,73 @@ class Mail(object):
 		for key in self.sendSeparateList:
 			self.send(self.sendSeparateList[key])
 		self.sendSeparateList = dict()
+
+	#============+
+	# Helper     |
+	#============+
+
+	def buildHowTo(self):
+	return """
+		# To delete a plan item
+		del <?char>:todo <num>
+
+		# To delete a calenda item
+		del <date> <td/dl> <num>
+
+		# To add a plan item:
+		add <char/stamp/todo> <content> 
+
+		# To change content of a plan item
+		fix <?char/stamp>:todo <num> <content>
+
+		# To move a todo item to a timed item
+		mov <num> <char/stamp>
+
+		# To move a timed item to a todo item
+		mov <char/stamp> <num>
+
+		# To mark that a todo item is done
+		fin <?char>:todo <num>
+
+		# To log a thought
+		log <content>
+
+		# To review the journal of a few recent days
+		qry <?num>:1
+
+		# To set new content inside the week table
+		set <wday> <?start>:0600 <?end>:start <content>
+
+		# To query contents from the table
+		qry <wday> <?start>:0600 <?end>:start
+
+		# To check todo and deadlines during a period of time
+		qry <start-date> <?end-date>:start-date
+
+		# To migrate a plan item to tomorrow
+		mig <?char>:todo <num>
+
+		# To pin a todo onto caledar
+		pin <?date>:tomorrow <content> 
+
+		# To pin a deadline onto calendar
+		dln <date> <content>
+
+		# To check a that some deadlines in notice list is submitted
+		sbm <num> <num> <num>...
+
+		# To query the 10-week calendar
+		qry ten
+
+		# To set a new interval
+		int <num>
+
+		# To set a new notification time
+		nti <num>
+
+		# To set a new dayend
+		dye <num>
+
+		# To terminate bluetime
+		kil
+		"""

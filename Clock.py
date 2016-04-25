@@ -1,6 +1,5 @@
 from time import sleep
 import sys
-from Mail import *
 
 class Clock(object):
 	def __init__(self, debug = False, interval = 5.0, 
@@ -13,24 +12,46 @@ class Clock(object):
 		self.sent = False
 		self.exit = False
 		self.mailReInit = False
-		self.pwIssue = False
+		self.update = False
 
-	def config(self, new_conf):
+	def dump(self):
+		return self
+
+	def load(self, old):
+		self.interval = old.interval
+		self.notiSoon = old.notiSoon
+		self.dayend = old.dayend
+		self.refMail = old.refMail
+		self.debug = old.debug
+		self.sent = old.sent
+		self.exit = old.exit
+		self.mailReInit = old.mailReInit
+		self.update = old.update
+
+	def config(self, mail):
+		new_conf = mail.conf()
 		if new_conf[0] > 0:
-			print "change interval"
+			mail.compose({'clock': 'interval changes from {} to {}'.format(
+				self.interval, int(new_conf[0]))})
 			self.interval = int(new_conf[0])
 		if new_conf[1] > 0:
-			print "change noti interval"
+			mail.compose({'clock': 'notiSoon changed from {} to {}'.format(
+				self.notiSoon, int(new_conf[1]))})
 			self.notiSoon = int(new_conf[1])
 		if new_conf[2] > 0:
-			print "change dayend point"
+			mail.compose({'clock': 'dayend changed from {} to {}'.format(
+				self.interval, int(new_conf[2]))})
 			self.dayend = int(new_conf[2])
 		if new_conf[3] > 0:
-			print "change refresh Mail interval"
+			mail.compose({'clock': 'refMail changed from {} to {}'.format(
+				self.interval, int(new_conf[3]))})
 			self.refMail = int(new_conf[3])
 		if new_conf[4]:
 			print "received terminal signal"
 			self.exit = True
+		if new_conf[5]:
+			mail.compose({'clock': 'received update code signal'})
+			self.update = True
 
 	def checkAndDo(self, time, tenw, wtab, jnal, plan, mail):
 
@@ -49,7 +70,7 @@ class Clock(object):
 			time.update()
 			print 'received order at {} of {}'.format(
 				time.timeStamp, time.tdSig)
-			self.config(mail.conf())
+			self.config(mail)
 			if mail.howto():
 				mail.doHowto()
 			if mail.plan():
@@ -87,6 +108,7 @@ class Clock(object):
 				leftover = time.tdSig
 			else:
 				leftover = time.past(1)
+			print "send leftover of {}".format(leftover)
 			mail.send(plan.leftoverMailFormat(leftover))
 			print "send notice list {}".format(planFor)
 			tenw.revive(planFor) # because tenw.todayNotice is not for dump and load at __init__
@@ -96,25 +118,31 @@ class Clock(object):
 			mail.send(plan.mailFormat())
 			self.sent = True
 
-	def run(self, time, tenw, wtab, jnal, plan):
-		mail = Mail(self.mailReInit, self.debug)
+	def run(self, ml, time, tenw, wtab, jnal, plan):
+		mail = ml.Mail(self.mailReInit, self.debug)
 		print 'mail: On'
+		if self.update == 'done':
+			mail.compose('all: code updated')
+			mail.allProcessed()
+			self.update = False
+			print('code update confirmation sent')
 		print 'enter loop'
 		time.update()
 		start = time.timeStamp
+		# this loop is to save time passing args to self.run
 		while not self.exit:
 			try:
-			# Infinite loop until master send EXIT email.
+			# Infinite loop until master send KIL or UPDATE signal
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
 				if time.minus(time.timeStamp, start) >= self.refMail:
 					print("time to refresh mail connection")
-					# For safety, not necessary dump plan and jnal here
+					# For safety, dump plan and jnal here
 					plan.dump()
 					jnal.logdown(time)
 					self.mailReInit = True
 					break
 				sleep(self.interval)
-			except:
+			except: # Need mail reinitialise
 				if self.debug:
 					raise
 				err = str(sys.exc_info()[0])
@@ -123,20 +151,23 @@ class Clock(object):
 				with open('ERRORLOG','a') as f:
 					f.write('{}: {}\n'.format(time.timeStamp, err))
 				print "save plan and journal"
-				# For safety, not necessary dump plan and jnal here
+				# For safety, dump plan and jnal here
 				plan.dump()
 				jnal.logdown(time)
 				if err == "<class 'httplib2.ServerNotFoundError'>":
 					print "Big issue. sleep for long and reinitialise"
 					sleep(self.interval * 20)
-					self.exit = True
-					self.pwIssue = True
+					self.mailReInit = True
 				else:
 					print 'reinitialise mail'
 					self.mailReInit = True
 				break
-		if self.exit and not self.pwIssue:
+			if self.update:
+				break
+
+		if self.exit:
 			print "clean and say goodbye"
 			mail.clean()
 			mail.sendExit()
+			
 		print 'mail: Off'
