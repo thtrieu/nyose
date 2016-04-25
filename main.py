@@ -23,7 +23,9 @@ if __name__ == "__main__":
 	print('tick: On' + int(debug)*' (debug mode)')
 
 	while not tick.exit:
-		# Mail receive a special treatment since 
+		# Mail receive a special treatment since it needs
+		# to be destruct and re-construct when there is connection fault
+		# thus it is initiate inside the scope of tick.run
 		tick.run(ml, time, tenw, wtab, jnal, plan)
 		if tick.update:
 			# TODO: Run git synchorise here
