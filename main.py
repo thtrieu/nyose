@@ -14,7 +14,7 @@ if __name__ == "__main__":
 	time = tm.Time() # Lazy time tracker
 	tenw = tw.TenWeek() # The long run
 	print('wtab, jnal, plan, time, tenw: On')
-	if len(sys.argv) == 0:
+	if len(sys.argv) == 1:
 		debug = False
 	else:
 		debug = True
