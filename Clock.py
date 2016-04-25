@@ -131,7 +131,6 @@ class Clock(object):
 		start = time.timeStamp
 		# this loop is to save time passing args to self.run
 		while not self.exit:
-			print ('a')
 			try:
 			# Infinite loop until master send KIL or UPDATE signal
 				self.checkAndDo(time, tenw, wtab, jnal, plan, mail)
