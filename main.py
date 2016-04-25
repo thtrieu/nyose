@@ -6,6 +6,7 @@ import Plan as pl
 import Time as tm
 import Mail as ml
 import sys
+from subprocess import call
 
 if __name__ == "__main__":
 	wtab = wt.WeekTable() # The template for planner
@@ -26,6 +27,8 @@ if __name__ == "__main__":
 		tick.run(ml, time, tenw, wtab, jnal, plan)
 		if tick.update:
 			# TODO: Run git synchorise here
+			#call("".split())
+			print "trial"
 			ml = reload(ml)
 			tm = reload(tm)
 			tw = reload(tw)
