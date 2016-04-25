@@ -149,7 +149,8 @@ class Clock(object):
 				print '\nERROR: {}. Log down'.format(err)
 				time.update()
 				with open('ERRORLOG','a') as f:
-					f.write('{}: {}\n'.format(time.timeStamp, err))
+					f.write('{} {}: {}\n'.format(
+						time.tdSig, time.timeStamp, err))
 				print "save plan and journal"
 				# For safety, dump plan and jnal here
 				plan.dump()
