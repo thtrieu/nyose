@@ -31,26 +31,26 @@ class Clock(object):
 	def config(self, mail):
 		new_conf = mail.conf()
 		if new_conf[0] > 0:
-			mail.compose({'clock': 'interval changes from {} to {}'.format(
+			mail.composeSuccess({'clock': 'interval changes from {} to {}'.format(
 				self.interval, int(new_conf[0]))})
 			self.interval = int(new_conf[0])
 		if new_conf[1] > 0:
-			mail.compose({'clock': 'notiSoon changed from {} to {}'.format(
+			mail.composeSuccess({'clock': 'notiSoon changed from {} to {}'.format(
 				self.notiSoon, int(new_conf[1]))})
 			self.notiSoon = int(new_conf[1])
 		if new_conf[2] > 0:
-			mail.compose({'clock': 'dayend changed from {} to {}'.format(
+			mail.composeSuccess({'clock': 'dayend changed from {} to {}'.format(
 				self.interval, int(new_conf[2]))})
 			self.dayend = int(new_conf[2])
 		if new_conf[3] > 0:
-			mail.compose({'clock': 'refMail changed from {} to {}'.format(
+			mail.composeSuccess({'clock': 'refMail changed from {} to {}'.format(
 				self.interval, int(new_conf[3]))})
 			self.refMail = int(new_conf[3])
 		if new_conf[4]:
 			print "received terminal signal"
 			self.exit = True
 		if new_conf[5]:
-			mail.compose({'clock': 'received update code signal'})
+			mail.composeSuccess({'clock': 'received update code signal'})
 			self.update = True
 
 	def checkAndDo(self, time, tenw, wtab, jnal, plan, mail):
@@ -122,7 +122,7 @@ class Clock(object):
 		mail = ml.Mail(self.mailReInit, self.debug)
 		print 'mail: On'
 		if self.update == 'done':
-			mail.compose('all: code updated')
+			mail.composeSuccess({'all': 'code updated'})
 			mail.allProcessed()
 			self.update = False
 			print('code update confirmation sent')
