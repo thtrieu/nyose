@@ -37,7 +37,7 @@ if __name__ == "__main__":
 					print(">> git pull")
 					mess = puller.pull()
 					print(mess)
-					tick.update = mess
+					tick.update = str(mess)
 					break
 				except:
 					print("puller error, retry")
