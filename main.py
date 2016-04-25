@@ -7,7 +7,7 @@ import Time as tm
 import Mail as ml
 import sys
 
-if __name__ == "__main__"
+if __name__ == "__main__":
 	wtab = wt.WeekTable() # The template for planner
 	jnal = jn.Journal() # The Journal
 	plan = pl.Plan() # The planner
