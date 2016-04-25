@@ -18,9 +18,8 @@ if __name__ == "__main__":
 		debug = False
 	else:
 		debug = True
-		print('debug mode')
 	tick = cl.Clock(debug) # The loop
-	print('tick: On')
+	print('tick: On' + int(debug)*' (debug mode)')
 
 	while not tick.exit:
 		# Mail receive a special treatment since 
