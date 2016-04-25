@@ -197,7 +197,7 @@ class TenWeek(object):
 			temp = self.tenw[content[0]]['DEADLINE'][content[1]][0]
 			self.tenw[content[0]]['DEADLINE'][content[1]] = (temp, True)
 		
-		mail['tenw'] = "submitted '{}' deadlines".format(
+		mail['tenw'] = "submitted {} deadlines".format(
 			len(order))
 		self.dump()
 		return mail
