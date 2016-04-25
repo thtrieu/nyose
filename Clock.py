@@ -163,6 +163,7 @@ class Clock(object):
 					self.mailReInit = True
 				break
 			if self.update:
+				self.mailReInit = True
 				break
 
 		if self.exit:
