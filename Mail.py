@@ -93,6 +93,7 @@ class Communicator(object):
 				userId=user_id, body=message).execute())
 			return message
 		except errors.HttpError, error:
+			print(message)
 			print('An error occurred: {}'.format(error))
 			return False
 	#Used

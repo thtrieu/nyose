@@ -172,5 +172,6 @@ class Clock(object):
 			print "clean and say goodbye"
 			mail.clean()
 			mail.sendExit()
-			
+		
+		mail.dump()
 		print 'mail: Off'
