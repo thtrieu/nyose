@@ -22,6 +22,7 @@ if __name__ == "__main__":
 					print(">> git pull")
 					mess = puller.pull()
 					print(mess)
+					break
 				except:
 					print("unsuccessful, retry")
 					sleep(5)
