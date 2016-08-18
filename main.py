@@ -22,10 +22,10 @@ if __name__ == "__main__":
 					print(">> git pull")
 					mess = str(puller.pull())
 					print(mess)
-					sys.exit()
 				except:
 					print("unsuccessful, retry")
 					sleep(5)
+			sys.exit()
 		debug = True
 
 	wtab = wt.WeekTable() # The template for planner
