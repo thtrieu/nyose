@@ -20,7 +20,7 @@ if __name__ == "__main__":
 			while True:
 				try:
 					print(">> git pull")
-					mess = str(puller.pull())
+					mess = puller.pull()
 					print(mess)
 				except:
 					print("unsuccessful, retry")
