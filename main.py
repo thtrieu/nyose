@@ -11,24 +11,31 @@ from time import sleep
 from subprocess import call
 
 if __name__ == "__main__":
+
+	puller = git.cmd.Git()
+	if len(sys.argv) == 1:
+		debug = False
+	else:
+		if sys.argv[1] == 'pull':
+			while True:
+				try:
+					print(">> git pull")
+					mess = pygit.pull()
+					print(mess)
+					sys.exit()
+				except:
+					print("{}ing error, retry".format(
+						sys.argv[1]))
+					sleep(5)
+		debug = True
+
 	wtab = wt.WeekTable() # The template for planner
 	jnal = jn.Journal() # The Journal
 	plan = pl.Plan() # The planner
 	time = tm.Time() # Lazy time tracker
 	tenw = tw.TenWeek() # The long run
-	puller = git.cmd.Git()
-
 	print('wtab, jnal, plan, time, tenw: On')
-	if len(sys.argv) == 1:
-		debug = False
-	else:
-		debug = True
-	if debug == 'pull':
-		print(">> git pull")
-		mess = puller.pull()
-		print(mess)
-		sys.exit()
-		
+
 	tick = cl.Clock(debug) # The loop
 	print('tick: On' + int(debug)*' (debug mode)')
 
