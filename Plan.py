@@ -31,7 +31,11 @@ class Plan(object):
 			return allPlan[len(allPlan)-1]
 
 	def getPlanList(self, planSig):
-		with open('plans/' + planSig,'r') as f:
+		file = 'plans/' + planSig
+		if not os.path.exists(file):
+			with open(file,'w') as f:
+				f.write('')
+		with open(file,'r') as f:
 			pl = f.readlines()
 		planList = dict()
 		planList['TODO'] = list()

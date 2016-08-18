@@ -86,7 +86,8 @@ class TenWeek(object):
 		marks = self.tenw.keys()
 		marks.sort()
 		i = 0
-		while marks[i] < timeSig: i += 1
+		while i < len(marks) and marks[i] < timeSig: 
+			i += 1
 		marks = marks[i:]
 		self.todayNotice = list()
 		for mark in marks:

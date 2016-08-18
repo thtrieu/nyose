@@ -365,7 +365,7 @@ class Mail(object):
 			thread_id = self.thread_and_subj[0]
 			subject = self.thread_and_subj[1]
 		else:
-			subject = '[bluetime] ' + mail['title']
+			subject = '[nyose] ' + mail['title']
 			evnt = 'event' in subject
 			dlns = 'deadlines' in subject
 			plan = 'plan' in subject
@@ -418,8 +418,9 @@ class Mail(object):
 
 	def sendExit(self):
 		mail = dict()
-		mail['title'] = 'exit'
-		mail['message'] = ["bluetime terminated. What a ride!"]
+		mail['title'] = 'bye bye!'
+		mail['message'] = ["I am terminating the moment you read this email"
+			+". Revive me soon!"]
 		self.send(mail)
 
 	#======================+
@@ -678,6 +679,12 @@ class Mail(object):
 			# To set a new dayend
 			dye <num>
 
-			# To terminate bluetime
+			# To set a new refresh interval for mail service
+			ref <num_minute>
+
+			# To terminate nyose
 			kil
+
+			# To update code
+			upd
 			"""
