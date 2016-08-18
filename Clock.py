@@ -2,7 +2,7 @@ from time import sleep
 import sys
 
 class Clock(object):
-	def __init__(self, debug = False, interval = 5.0, 
+	def __init__(self, debug = False, interval = 3.0, 
 		notiSoon = 10, dayend = 2340, refMail = 60):
 		self.interval = interval
 		self.notiSoon = notiSoon
