@@ -18,12 +18,12 @@ if __name__ == "__main__":
 	else:
 		if sys.argv[1] == 'pull':
 			while True:
-				try:
+				#try:
 					print(">> git pull")
 					mess = puller.pull()
 					print(mess)
 					sys.exit()
-				except:
+				#except:
 					print("unsuccessful, retry")
 					sleep(5)
 		debug = True
