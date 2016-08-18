@@ -20,7 +20,7 @@ if __name__ == "__main__":
 			while True:
 				try:
 					print(">> git pull")
-					mess = puller.pull()
+					mess = str(puller.pull())
 					print(mess)
 					sys.exit()
 				except:
