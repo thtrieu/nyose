@@ -109,8 +109,8 @@ class Plan(object):
 				mail[key].append(todo)
 		if mail[key] == list():
 			del mail[key]
-			mail['message'] = ['Congratulations, no leftover at all ;)']
-		mail['title'] = 'What is left from {}?'.format(planDate)
+			mail['message'] = ['good job, no leftover at all ;)']
+		mail['title'] = 'what is left from {}?'.format(planDate)
 		return mail
 
 	def mailFormat(self, planDate = ''):
