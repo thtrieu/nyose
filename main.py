@@ -24,8 +24,7 @@ if __name__ == "__main__":
 					print(mess)
 					sys.exit()
 				except:
-					print("{}ing error, retry".format(
-						sys.argv[1]))
+					print("unsuccessful, retry")
 					sleep(5)
 		debug = True
 
