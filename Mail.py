@@ -87,7 +87,7 @@ class Communicator(object):
 			return False
 	#Used
 	def SendMessage(self, service, message):
-		user_id = 'me'
+		user_id = 'nyose'
 		try:
 			message = (service.users().messages().send(
 				userId=user_id, body=message).execute())
