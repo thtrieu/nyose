@@ -16,15 +16,22 @@ if __name__ == "__main__":
 	plan = pl.Plan() # The planner
 	time = tm.Time() # Lazy time tracker
 	tenw = tw.TenWeek() # The long run
+	puller = git.cmd.Git()
+
 	print('wtab, jnal, plan, time, tenw: On')
 	if len(sys.argv) == 1:
 		debug = False
 	else:
 		debug = True
+	if debug == 'pull':
+		print(">> git pull")
+		mess = puller.pull()
+		print(mess)
+		sys.exit()
+		
 	tick = cl.Clock(debug) # The loop
 	print('tick: On' + int(debug)*' (debug mode)')
 
-	puller = git.cmd.Git()
 	while not tick.exit:
 		# Mail receive a special treatment since it needs
 		# to be destruct and re-construct when there is connection fault
