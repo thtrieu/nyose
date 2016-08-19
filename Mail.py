@@ -25,7 +25,11 @@ class Communicator(object):
 	#Used
 	def getService(self, name):
 		CLIENT_SECRET = 'clientSecrets.json'
-		SCOPES = 'https://mail.google.com/'
+		SCOPES = ['https://mail.google.com/']
+		SCOPES += ['https://www.googleapis.com/auth/gmail.compose']
+		SCOPES += ['https://www.googleapis.com/auth/gmail.modify']
+		SCOPES += ['https://www.googleapis.com/auth/gmail.settings.sharing']
+		SCOPES += ['https://www.googleapis.com/auth/gmail.settings.basic']
 		store = file.Storage('storage_{}.json'.format(name))
 		creds = store.get()
 		if not creds or creds.invalid:
@@ -105,8 +109,7 @@ class Communicator(object):
 		message['from'] = sender
 		message['subject'] = subject
 		send = {'raw': base64.urlsafe_b64encode(message.as_string())}
-		if thread_id != '':
-			send['threadId'] = thread_id
+		if thread_id != '':	send['threadId'] = thread_id
 		return send
 
 	def CreateMessageWithAttachment(self, sender, to, subject, 
@@ -198,6 +201,7 @@ class Mail(object):
 		while not flag:
 			r = obj(*args, **kwargs)
 			if r is False:
+				print('operation failed, tryin again')
 				time.sleep(5)
 			else:
 				flag = True
